@@ -31,8 +31,7 @@ jsonnet -J vendor -m grafana-dashboards/ -e '(import "mixin.libsonnet").grafanaD
 popd
 mkdir -p out/configmaps/prometheus/{prometheus,grafana-dashboards}
 cp -r /kubernetes-mixin/kubernetes-mixin-*.yaml out/configmaps/prometheus/prometheus/
-cp -r /kubernetes-mixin/grafana-dashboards/* out/configmaps/prometheus/grafana-dashboards/
-
+cp -r /kubernetes-mixin/grafana-dashboards out/configmaps/prometheus/grafana-dashboards-kubernetes-mixins
 
 #
 find out
