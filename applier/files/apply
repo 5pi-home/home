@@ -1,0 +1,23 @@
+#!/bin/bash
+# exec 3>&1 1>&2 # Send stdout to stderr and make 3 alias of stdout
+set -euo pipefail
+set -x
+
+render_configmaps() {
+  local dir="$1"
+  for nsd in "$dir"/*; do
+    for path in "$nsd"/*; do
+      local name=$(basename "$path")
+      local namespace=$(basename "$nsd")
+      kubectl create configmap -n "$namespace" --dry-run "$name" -o yaml --from-file "$path"
+      echo "---"
+    done
+  done
+}
+
+main() {
+  root="$1"
+  render_configmaps "$root/configmaps"
+}
+
+main "$@"
