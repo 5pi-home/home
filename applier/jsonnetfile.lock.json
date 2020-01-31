@@ -1,0 +1,59 @@
+{
+  "dependencies": [
+    {
+      "name": "grafana-builder",
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs",
+          "subdir": "grafana-builder"
+        }
+      },
+      "version": "e92000a708ded5bde1dd332a8e7457d0b39b7928",
+      "sum": "slxrtftVDiTlQK22ertdfrg4Epnq97gdrLI63ftUfaE="
+    },
+    {
+      "name": "grafonnet",
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/grafonnet-lib",
+          "subdir": "grafonnet"
+        }
+      },
+      "version": "f3ee1d810858cf556d25f045b53cb0f1fd10b94e",
+      "sum": "14YBZUP/cl8qi9u86xiuUS4eXQrEAam+4GSg6i9n9Ys="
+    },
+    {
+      "name": "ksonnet-lib",
+      "source": {
+        "git": {
+          "remote": "https://github.com/ksonnet/ksonnet-lib",
+          "subdir": ""
+        }
+      },
+      "version": "0d2f82676817bbf9e4acf6495b2090205f323b9f",
+      "sum": "h28BXZ7+vczxYJ2sCt8JuR9+yznRtU/iA6DCpQUrtEg="
+    },
+    {
+      "name": "kubernetes-mixin",
+      "source": {
+        "git": {
+          "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin",
+          "subdir": ""
+        }
+      },
+      "version": "68f82d2a428d91df57e9af43739981a6a8ede897",
+      "sum": "J/tuXi0Z8GRHo63pM17YFIyk4QgkFuMcQ20mAxi1flM="
+    },
+    {
+      "name": "slo-libsonnet",
+      "source": {
+        "git": {
+          "remote": "https://github.com/metalmatze/slo-libsonnet",
+          "subdir": "slo-libsonnet"
+        }
+      },
+      "version": "437c402c5f3ad86c3c16db8471f1649284fef0ee",
+      "sum": "2Zcyku1f558VrUpMaJnI78fahDksPLcS1idmxxwcQ7Q="
+    }
+  ]
+}
