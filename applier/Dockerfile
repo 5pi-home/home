@@ -19,5 +19,3 @@ COPY jsonnetfile*.json /app/
 WORKDIR /app
 RUN jb install
 COPY . /app
-
-ENTRYPOINT [ "/app/apply" ]

@@ -12,7 +12,7 @@ local containerVolumeMount = container.volumeMountsType;
 local service = k.core.v1.service;
 local servicePort = k.core.v1.service.mixin.spec.portsType;
 
-local kubernetes_mixins = import 'kubernetes-mixins/mixin.libsonnet';
+local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
 
 local grafana = (
   (import 'grafana/grafana.libsonnet') +

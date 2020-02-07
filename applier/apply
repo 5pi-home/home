@@ -1,9 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-set -x
-
-main() {
-  jsonnet -J vendor site.libsonnet
-}
-
-main "$@"
