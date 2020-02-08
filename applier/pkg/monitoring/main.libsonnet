@@ -29,6 +29,13 @@ local grafana = (
           requests: { memory: '80Mi' },
           limits: { memory: '80Mi' },
         },
+        config: {
+          sections: {
+            'auth.anonymous': {
+              enabled: true
+            }
+          },
+        },
       },
     },
   }
@@ -44,11 +51,13 @@ k.core.v1.list.new(
     grafana.dashboardDatasources,
     grafana.deployment,
     grafana.serviceAccount,
+    grafana.config,
     grafana.service +
-    service.mixin.spec.withPorts(servicePort.newNamed('http', 3000, 'http') + servicePort.withNodePort(30910)) +
-    service.mixin.spec.withType('NodePort'),
+    service.mixin.spec.withPorts(servicePort.newNamed('http', 3000, 'http')) +
+    service.mixin.spec.withType('ClusterIP'),
     ingress.new() +
     ingress.mixin.metadata.withName('grafana') +
+    ingress.mixin.metadata.withNamespace('monitoring') +
     ingress.mixin.spec.withRules([
       ingressRule.new() +
       ingressRule.withHost('grafana.d.42o.de') +
@@ -56,7 +65,7 @@ k.core.v1.list.new(
         httpIngressPath.new() +
         httpIngressPath.withPath('/') +
         httpIngressPath.mixin.backend.withServiceName('grafana') +
-        httpIngressPath.mixin.backend.withServicePort(80),
+        httpIngressPath.mixin.backend.withServicePort(3000),
       ]),
     ]),
   ]
