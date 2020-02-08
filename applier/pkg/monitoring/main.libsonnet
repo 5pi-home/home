@@ -20,6 +20,9 @@ local grafana = (
   {
     _config+:: {
       namespace: 'monitoring',
+      versions+:: {
+        grafana: '6.6.0'
+      },
       grafana+:: {
         dashboards: $.grafanaDashboards,
         container: {
