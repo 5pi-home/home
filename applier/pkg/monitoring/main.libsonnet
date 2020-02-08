@@ -13,6 +13,7 @@ local service = k.core.v1.service;
 local servicePort = k.core.v1.service.mixin.spec.portsType;
 
 local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
+local prometheus = import 'prometheus.libsonnet';
 
 local grafana = (
   (import 'grafana/grafana.libsonnet') +
@@ -45,6 +46,7 @@ k.core.v1.list.new(
   [
     namespace.new('monitoring'),
   ] +
+  prometheus +
   grafana.dashboardDefinitions +
   [
     grafana.dashboardSources,
@@ -70,27 +72,3 @@ k.core.v1.list.new(
     ]),
   ]
 )
-/*
-// std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts)
-[
-  configMap.new('prometheus') +
-  configMap.withData({
-    'prometheus.yaml': 'oo',
-    'alerts.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
-    'rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
-  }),
-] + [
-  configMap.new(name) +
-  configMap.withData(kubernetes_mixins.grafanaDashboards[name])
-
-
-  deployment.new('grafana', 1, c, podLabels) +
-  deployment.mixin.metadata.withNamespace('monitoring') +
-
-]
-// (import "kubernetes-mixins/mixin.libsonnet").prometheusAlerts)
-
-*/
-
-
-

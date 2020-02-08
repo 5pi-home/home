@@ -29,6 +29,16 @@
         }
       },
       "version": "release-0.3"
+    },
+    {
+      "name": "prometheus",
+      "source": {
+        "git": {
+          "remote": "https://github.com/coreos/kube-prometheus",
+          "subdir": "jsonnet/kube-prometheus/prometheus"
+        }
+      },
+      "version": "master"
     }
   ]
 }

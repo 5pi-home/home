@@ -67,6 +67,17 @@
       "sum": "J/tuXi0Z8GRHo63pM17YFIyk4QgkFuMcQ20mAxi1flM="
     },
     {
+      "name": "prometheus",
+      "source": {
+        "git": {
+          "remote": "https://github.com/coreos/kube-prometheus",
+          "subdir": "jsonnet/kube-prometheus/prometheus"
+        }
+      },
+      "version": "8550ac35bf491ae031397cb1310d989bebd09034",
+      "sum": "hEo3wJNCAM7Ze5fkRFjp9Ec79x3ItKMo9QYHDrHaJi0="
+    },
+    {
       "name": "slo-libsonnet",
       "source": {
         "git": {
