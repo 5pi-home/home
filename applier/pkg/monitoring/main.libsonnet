@@ -13,7 +13,14 @@ local service = k.core.v1.service;
 local servicePort = k.core.v1.service.mixin.spec.portsType;
 
 local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
-local prometheus = (import 'prometheus.libsonnet').new();
+local prometheus = (
+  (import 'prometheus.libsonnet') +
+  {
+    __config+:: {
+      namespace: 'monitoring'
+    }
+  }
+).prometheus;
 
 local grafana = (
   (import 'grafana/grafana.libsonnet') +
