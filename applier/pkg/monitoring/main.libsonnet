@@ -13,11 +13,20 @@ local service = k.core.v1.service;
 local servicePort = k.core.v1.service.mixin.spec.portsType;
 
 local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
+
+local prometheus_node_selector = {
+  'kubernetes.io/hostname': 'openwrt'
+};
+
 local prometheus = (
-  (import 'prometheus.libsonnet') +
+  (import 'prometheus/main.libsonnet') +
   {
     __config+:: {
-      namespace: 'monitoring'
+      namespace: 'monitoring',
+      config_files+: {
+        'rules.yaml': kubernetes_mixins.prometheusRules,
+        'alerts.yam': kubernetes_mixins.prometheusAlerts,
+      },
     }
   }
 ).prometheus;
@@ -52,8 +61,10 @@ local grafana = (
 k.core.v1.list.new(
   [
     namespace.new('monitoring'),
-    prometheus.deployment,
+    prometheus.deployment +
+      deployment.mixin.spec.template.spec.withNodeSelector(prometheus_node_selector),
     prometheus.service,
+    prometheus.config_map,
   ] +
   grafana.dashboardDefinitions +
   [
