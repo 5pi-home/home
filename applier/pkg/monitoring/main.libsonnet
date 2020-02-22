@@ -21,11 +21,11 @@ local prometheus_node_selector = {
 local prometheus = (
   (import 'prometheus/main.libsonnet') +
   {
-    __config+:: {
+    _config+:: {
       namespace: 'monitoring',
       config_files+: {
-        'rules.yaml': kubernetes_mixins.prometheusRules,
-        'alerts.yam': kubernetes_mixins.prometheusAlerts,
+        'rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
+        'alerts.yam': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
       },
     }
   }

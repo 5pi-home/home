@@ -15,7 +15,8 @@ local configMap = k.core.v1.configMap;
     namespace: 'prometheus',
     version: '2.15.2',
     port: 9090,
-    image_repo: 'prometheus/prometheus',
+    uid: 1000,
+    image_repo: 'prom/prometheus',
     config_files+: {
       'prometheus.yaml': std.manifestYamlDoc(import 'config.libsonnet'),
     }
@@ -23,7 +24,7 @@ local configMap = k.core.v1.configMap;
   prometheus+: {
     local vm = containerVolumeMount.new("data", "/prometheus"),
     local v = volume.fromHostPath("data", "/data/prometheus"),
-    local image = $._config.image_repo + ':' + $._config.version,
+    local image = $._config.image_repo + ':v' + $._config.version,
     local c = container.new("prometheus", image) +
       container.withVolumeMounts([vm]),
     local podLabels = { app: $._config.name },
@@ -33,6 +34,8 @@ local configMap = k.core.v1.configMap;
       deployment.mixin.metadata.withNamespace($._config.namespace) +
       deployment.mixin.metadata.withLabels(podLabels) +
       deployment.mixin.spec.selector.withMatchLabels(podLabels) +
+      deployment.mixin.spec.template.spec.securityContext.withFsGroup($._config.uid) +
+      deployment.mixin.spec.template.spec.securityContext.withRunAsUser($._config.uid) +
       deployment.mixin.spec.template.spec.withVolumes([v]),
 
     service: service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
