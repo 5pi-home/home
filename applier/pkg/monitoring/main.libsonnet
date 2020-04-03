@@ -31,6 +31,15 @@ local prometheus = (
   }
 ).prometheus;
 
+local blackbox_exporter = (
+  (import 'blackbox_exporter/main.libsonnet') +
+  {
+    _config+:: {
+      namespace: 'monitoring',
+    },
+  }
+).blackbox_exporter;
+
 local grafana = (
   (import 'grafana/grafana.libsonnet') +
   kubernetes_mixins +
@@ -84,6 +93,9 @@ k.core.v1.list.new(
         httpIngressPath.mixin.backend.withServicePort(9090),
       ]),
     ]),
+    blackbox_exporter.deployment,
+    blackbox_exporter.service,
+    blackbox_exporter.config_map,
   ] +
   grafana.dashboardDefinitions +
   [
