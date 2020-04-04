@@ -9,6 +9,11 @@ local volume = k.apps.v1.deployment.mixin.spec.template.spec.volumesType;
 local containerVolumeMount = container.volumeMountsType;
 local configMap = k.core.v1.configMap;
 
+local ingress = k.extensions.v1beta1.ingress;
+local ingressRule = ingress.mixin.spec.rulesType;
+local httpIngressPath = ingressRule.mixin.http.pathsType;
+
+local reloader = import 'reloader/main.libsonnet';
 {
   _config+:: {
     name: 'prometheus',
@@ -17,18 +22,31 @@ local configMap = k.core.v1.configMap;
     port: 9090,
     uid: 1000,
     image_repo: 'prom/prometheus',
+    external_domain: 'prometheus.d.42o.de',
+    external_proto: 'http',
     config_files+: {
-      'prometheus.yml': std.manifestYamlDoc(import 'config.libsonnet'),
+      'prometheus.yaml': std.manifestYamlDoc(import 'config.libsonnet'),
     }
   },
   prometheus+: {
-    local datavm = containerVolumeMount.new("data", "/prometheus"),
-    local datav = volume.fromHostPath("data", "/data/prometheus"),
-    local configvm = containerVolumeMount.new("config", "/etc/prometheus"),
-    local configv = volume.withName("config") + volume.mixin.configMap.withName("prometheus"),
+    local dataVolumeName = 'data',
+    local configVolumeName = 'config',
+    local datavm = containerVolumeMount.new(dataVolumeName, "/prometheus"),
+    local datav = volume.fromHostPath(dataVolumeName, "/data/prometheus"),
+    local configvm = containerVolumeMount.new(configVolumeName, "/etc/prometheus"),
+    local configv = volume.withName(configVolumeName) + volume.mixin.configMap.withName("prometheus"),
     local image = $._config.image_repo + ':v' + $._config.version,
-    local c = container.new("prometheus", image) +
+    local mainContainer = container.new("prometheus", image) +
+      container.withArgs([
+        '--config.file=/etc/prometheus/prometheus.yaml',
+        '--log.level=info',
+        '--storage.tsdb.path=/prometheus',
+        '--web.enable-lifecycle',
+        '--web.enable-admin-api',
+        '--web.external-url=' + $._config.external_proto + '://' + $._config.external_domain,
+      ]) +
       container.withVolumeMounts([datavm, configvm]),
+    local reloaderContainer = reloader.volume_webhook(configVolumeName, "http://localhost:9090/-/reload"),
     local podLabels = { app: $._config.name },
     local serviceAccountName = 'prometheus',
 
@@ -85,7 +103,7 @@ local configMap = k.core.v1.configMap;
 
 
     deployment:
-      deployment.new($._config.name, 1, c, podLabels) +
+      deployment.new($._config.name, 1, [ mainContainer, reloaderContainer ], podLabels) +
       deployment.mixin.metadata.withNamespace($._config.namespace) +
       deployment.mixin.metadata.withLabels(podLabels) +
       deployment.mixin.spec.selector.withMatchLabels(podLabels) +
@@ -99,5 +117,20 @@ local configMap = k.core.v1.configMap;
 
     config_map: configMap.new($._config.name, $._config.config_files) +
       configMap.mixin.metadata.withNamespace($._config.namespace),
+
+    ingress:
+      ingress.new() +
+      ingress.mixin.metadata.withName($._config.name) +
+      ingress.mixin.metadata.withNamespace($._config.namespace) +
+      ingress.mixin.spec.withRules([
+        ingressRule.new() +
+        ingressRule.withHost($._config.external_domain) +
+        ingressRule.mixin.http.withPaths([
+          httpIngressPath.new() +
+          httpIngressPath.withPath('/') +
+          httpIngressPath.mixin.backend.withServiceName($._config.name) +
+          httpIngressPath.mixin.backend.withServicePort($._config.port),
+        ]),
+      ]),
   }
 }

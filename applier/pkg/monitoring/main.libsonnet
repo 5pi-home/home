@@ -80,19 +80,8 @@ k.core.v1.list.new(
     prometheus.serviceAccount,
     prometheus.clusterRole,
     prometheus.clusterRoleBinding,
-    ingress.new() +
-    ingress.mixin.metadata.withName('prometheus') +
-    ingress.mixin.metadata.withNamespace('monitoring') +
-    ingress.mixin.spec.withRules([
-      ingressRule.new() +
-      ingressRule.withHost('prometheus.d.42o.de') +
-      ingressRule.mixin.http.withPaths([
-        httpIngressPath.new() +
-        httpIngressPath.withPath('/') +
-        httpIngressPath.mixin.backend.withServiceName('prometheus') +
-        httpIngressPath.mixin.backend.withServicePort(9090),
-      ]),
-    ]),
+    prometheus.ingress,
+
     blackbox_exporter.deployment,
     blackbox_exporter.service,
     blackbox_exporter.config_map,

@@ -11,7 +11,7 @@ apply: all
 
 build/%.json: pkg/%/main.libsonnet
 	mkdir -p build/
-	jsonnet -J vendor $< -o $@
+	jsonnet -J vendor -J lib $< -o $@
 
 .PHONY: clean
 clean:

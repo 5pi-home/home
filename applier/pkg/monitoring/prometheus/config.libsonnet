@@ -1,8 +1,11 @@
 {
+  rule_files: [
+    '/etc/prometheus/*.rules.yaml'
+  ],
   scrape_configs: [
     {
       bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
-      job_name: 'kubernetes-apiservers',
+      job_name: 'kubernetes-apiserver',
       kubernetes_sd_configs: [
         {
           role: 'endpoints',
