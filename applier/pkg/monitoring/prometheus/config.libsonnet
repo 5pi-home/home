@@ -84,6 +84,22 @@
           target_label: '__metrics_path__',
         },
       ],
+      metric_relabel_configs: [
+        // Drop container_* metrics with no image.
+        {
+          source_labels: ['__name__', 'image'],
+          regex: 'container_([a-z_]+);',
+          action: 'drop',
+        },
+
+        // Drop a bunch of metrics which are disabled but still sent, see
+        // https://github.com/google/cadvisor/issues/1925.
+        {
+          source_labels: ['__name__'],
+          regex: 'container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)',
+          action: 'drop',
+        },
+      ],
       scheme: 'https',
       tls_config: {
         ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
@@ -239,19 +255,33 @@
           action: 'labelmap',
           regex: '__meta_kubernetes_pod_label_(.+)',
         },
+        // Rename jobs to be <namespace>/<name, from pod name label>
         {
+          source_labels: ['__meta_kubernetes_namespace', '__meta_kubernetes_pod_label_name'],
           action: 'replace',
-          source_labels: [
-            '__meta_kubernetes_namespace',
-          ],
-          target_label: 'kubernetes_namespace',
+          separator: '/',
+          target_label: 'job',
+          replacement: '$1',
         },
+
+        // But also include the namespace as a separate label, for routing alerts
         {
+          source_labels: ['__meta_kubernetes_namespace'],
           action: 'replace',
-          source_labels: [
-            '__meta_kubernetes_pod_name',
-          ],
-          target_label: 'kubernetes_pod_name',
+          target_label: 'namespace',
+        },
+
+        // Rename instances to be the pod name
+        {
+          source_labels: ['__meta_kubernetes_pod_name'],
+          action: 'replace',
+          target_label: 'instance',
+        },
+
+        {
+          regex: '__meta_kubernetes_pod_annotation_prometheus_io_param_(.+)',
+          action: 'labelmap',
+          replacement: '__param_$1',
         },
       ],
     },
