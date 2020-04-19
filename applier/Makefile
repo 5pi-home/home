@@ -1,5 +1,5 @@
-SOURCES := $(wildcard pkg/*)
-NAMES   := $(SOURCES:pkg/%=%)
+SOURCES := $(wildcard site/*)
+NAMES   := $(SOURCES:site/%.jsonnet=%)
 TARGETS := $(addprefix build/,$(addsuffix .json, $(NAMES:/=)))
 
 .PHONY: all
@@ -9,10 +9,17 @@ all: $(TARGETS)
 apply: all
 	kubectl apply -f build/*
 
-build/%.json: pkg/%/main.libsonnet
+build/%.json: site/%.jsonnet
 	mkdir -p build/
 	jsonnet -J vendor -J lib $< -o $@
 
 .PHONY: clean
 clean:
 	rm -rf build/*
+
+echo:
+	echo $(SOURCES)
+	echo $(NAMES)
+	echo $(TARGETS)
+
+

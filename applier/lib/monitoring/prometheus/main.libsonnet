@@ -25,7 +25,7 @@ local prometheus_config = import 'config.libsonnet';
     port: 9090,
     uid: 1000,
     image_repo: 'prom/prometheus',
-    external_domain: 'prometheus.d.42o.de',
+    external_domain: 'prometheus.example.com',
     external_proto: 'http',
     config_files+: {
       'prometheus.yaml': std.manifestYamlDoc(prometheus_config),
