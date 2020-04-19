@@ -13,6 +13,7 @@ local service = k.core.v1.service;
 local servicePort = k.core.v1.service.mixin.spec.portsType;
 
 local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
+local node_mixins = import 'node-mixins.libsonnet';
 
 {
   _config+:: {
@@ -28,8 +29,11 @@ local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
         namespace: $._config.namespace,
         external_domain: $._config.prometheus.host,
         config_files+: {
-          'recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
-          'alerting.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
+          'kubernetes.recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
+          'kubernetes.alerting.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
+
+          'node.recording.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusRules),
+          'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
         },
       }
     }
@@ -39,15 +43,25 @@ local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
     (import 'blackbox_exporter/main.libsonnet') +
     {
       _config+:: {
-        namespace: 'monitoring',
+        namespace: $._config.namespace,
       },
     }
   ).blackbox_exporter,
 
+  node_exporter: (
+    (import 'node_exporter/main.libsonnet') +
+    {
+      _config+:: {
+        namespace: $._config.namespace,
+      },
+    }
+  ).node_exporter,
+
   grafana:
     local grafana = (
       (import 'grafana/grafana.libsonnet') +
-      kubernetes_mixins
+      kubernetes_mixins +
+      node_mixins
     );
     (
       grafana +
@@ -93,6 +107,8 @@ local kubernetes_mixins = import 'kubernetes-mixins.libsonnet';
       $.blackbox_exporter.deployment,
       $.blackbox_exporter.service,
       $.blackbox_exporter.config_map,
+
+      $.node_exporter.daemonset,
     ] +
     $.grafana.dashboardDefinitions +
     [

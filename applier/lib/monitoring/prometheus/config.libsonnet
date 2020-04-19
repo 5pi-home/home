@@ -144,7 +144,7 @@
     // A separate scrape config for node-exporter which maps the nodename onto the
     // instance label.
     {
-      job_name: 'node-exporter',
+      job_name: 'node',
       kubernetes_sd_configs: [{
         role: 'pod',
       }],
@@ -175,6 +175,13 @@
           action: 'replace',
           target_label: 'namespace',
         },
+
+        {
+          source_labels: ['__address__'],
+          replacement: '${1}:9100',
+          target_label: '__address__',
+        },
+
       ],
     },
     {

@@ -67,6 +67,17 @@
       "sum": "J/tuXi0Z8GRHo63pM17YFIyk4QgkFuMcQ20mAxi1flM="
     },
     {
+      "name": "node-mixin",
+      "source": {
+        "git": {
+          "remote": "https://github.com/prometheus/node_exporter",
+          "subdir": "docs/node-mixin"
+        }
+      },
+      "version": "fa4edd700ebc1b3614bcd953c215d3f2ab2e0b35",
+      "sum": "ZwrC0+4o1xD6+oPBu1p+rBXLlf6pMBD9rT8ygyl2aW0="
+    },
+    {
       "name": "prometheus",
       "source": {
         "git": {
@@ -76,6 +87,17 @@
       },
       "version": "8550ac35bf491ae031397cb1310d989bebd09034",
       "sum": "hEo3wJNCAM7Ze5fkRFjp9Ec79x3ItKMo9QYHDrHaJi0="
+    },
+    {
+      "name": "promgrafonnet",
+      "source": {
+        "git": {
+          "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin",
+          "subdir": "lib/promgrafonnet"
+        }
+      },
+      "version": "3cc34f995c31ed6e1e92024fed1912d63569c39f",
+      "sum": "VhgBM39yv0f4bKv8VfGg4FXkg573evGDRalip9ypKbc="
     },
     {
       "name": "slo-libsonnet",
