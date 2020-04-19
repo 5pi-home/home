@@ -5,7 +5,7 @@
   scrape_configs: [
     {
       bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
-      job_name: 'kubernetes-apiserver',
+      job_name: 'kube-apiserver',
       kubernetes_sd_configs: [
         {
           role: 'endpoints',
@@ -29,7 +29,7 @@
     },
     {
       bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
-      job_name: 'kubernetes-nodes',
+      job_name: 'kubelet',
       kubernetes_sd_configs: [
         {
           role: 'node',
@@ -60,7 +60,7 @@
     },
     {
       bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
-      job_name: 'kubernetes-cadvisor',
+      job_name: 'cadvisor',
       kubernetes_sd_configs: [
         {
           role: 'node',
@@ -104,6 +104,78 @@
       tls_config: {
         ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
       },
+    },
+    // A separate scrape config for kube-state-metrics which doesn't add a namespace
+    // label, instead taking the namespace label from the exported timeseries.  This
+    // prevents the exported namespace label being renamed to exported_namespace, and
+    // allows us to route alerts based on namespace.
+    {
+      job_name: 'kube-state-metrics',
+      kubernetes_sd_configs: [{
+        role: 'pod',
+      }],
+
+      tls_config: {
+        ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
+      },
+      bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
+
+      relabel_configs: [
+
+        // Drop anything who's service is not kube-state-metrics
+        // Rename jobs to be <namespace>/<name, from pod name label>
+        {
+          source_labels: ['__meta_kubernetes_pod_label_name'],
+          regex: 'kube-state-metrics',
+          action: 'keep',
+        },
+
+        // Rename instances to be the pod name.
+        // As the scrape two ports of KSM, include the port name in the instance
+        // name.  Otherwise alerts about scrape failures and timeouts won't work.
+        {
+          source_labels: ['__meta_kubernetes_pod_name', '__meta_kubernetes_pod_container_port_name'],
+          action: 'replace',
+          separator: ':',
+          target_label: 'instance',
+        },
+      ],
+    },
+    // A separate scrape config for node-exporter which maps the nodename onto the
+    // instance label.
+    {
+      job_name: 'node-exporter',
+      kubernetes_sd_configs: [{
+        role: 'pod',
+      }],
+
+      tls_config: {
+        ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
+      },
+      bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
+
+      relabel_configs: [
+        // Drop anything who's name is not node-exporter.
+        {
+          source_labels: ['__meta_kubernetes_pod_label_name'],
+          regex: 'node-exporter',
+          action: 'keep',
+        },
+
+        // Rename instances to be the node name.
+        {
+          source_labels: ['__meta_kubernetes_pod_node_name'],
+          action: 'replace',
+          target_label: 'instance',
+        },
+
+        // But also include the namespace as a separate label, for routing alerts
+        {
+          source_labels: ['__meta_kubernetes_namespace'],
+          action: 'replace',
+          target_label: 'namespace',
+        },
+      ],
     },
     {
       job_name: 'kubernetes-service-endpoints',

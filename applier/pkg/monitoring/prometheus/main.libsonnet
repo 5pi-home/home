@@ -14,6 +14,9 @@ local ingressRule = ingress.mixin.spec.rulesType;
 local httpIngressPath = ingressRule.mixin.http.pathsType;
 
 local reloader = import 'reloader/main.libsonnet';
+
+local prometheus_config = import 'config.libsonnet';
+
 {
   _config+:: {
     name: 'prometheus',
@@ -25,7 +28,7 @@ local reloader = import 'reloader/main.libsonnet';
     external_domain: 'prometheus.d.42o.de',
     external_proto: 'http',
     config_files+: {
-      'prometheus.yaml': std.manifestYamlDoc(import 'config.libsonnet'),
+      'prometheus.yaml': std.manifestYamlDoc(prometheus_config),
     }
   },
   prometheus+: {
