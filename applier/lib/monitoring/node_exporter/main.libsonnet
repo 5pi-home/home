@@ -1,4 +1,4 @@
-local k = import 'ksonnet-lib/ksonnet.beta.4/k.libsonnet';
+local k = import 'ksonnet.beta.4/k.libsonnet';
 local container = k.apps.v1.deployment.mixin.spec.template.spec.containersType;
 local DaemonSet = k.apps.v1.daemonSet;
 

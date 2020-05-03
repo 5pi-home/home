@@ -1,4 +1,4 @@
-local k = import 'ksonnet-lib/ksonnet.beta.4/k.libsonnet';
+local k = import 'ksonnet.beta.4/k.libsonnet';
 local configMap = k.core.v1.configMap;
 local namespace = k.core.v1.namespace;
 local container = k.apps.v1.deployment.mixin.spec.template.spec.containersType;

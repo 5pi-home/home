@@ -11,11 +11,21 @@
       "version": "master"
     },
     {
-      "name": "ksonnet-lib",
+      "name": "jsonnet-libs",
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs",
+          "subdir": ""
+        }
+      },
+      "version": "master"
+    },
+    {
+      "name": "ksonnet.beta.4",
       "source": {
         "git": {
           "remote": "https://github.com/ksonnet/ksonnet-lib",
-          "subdir": ""
+          "subdir": "ksonnet.beta.4"
         }
       },
       "version": "master"

@@ -1,4 +1,4 @@
-local K = import 'ksonnet-lib/ksonnet.beta.4/k.libsonnet';
+local K = import 'ksonnet.beta.4/k.libsonnet';
 local Service = K.core.v1.service;
 local Endpoints = K.core.v1.endpoints;
 local EndpointSubset = Endpoints.subsetsType;
