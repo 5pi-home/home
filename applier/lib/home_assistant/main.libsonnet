@@ -38,7 +38,9 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
     local mainContainer = Container.new($._config.name, image) +
       Container.withArgs(["python3", "-m", "homeassistant", "--config", "/config"]) +
       Container.withVolumeMounts([volumeMount, devVolumeMount]) +
-      Container.mixin.securityContext.withPrivileged(true),
+      Container.mixin.securityContext.withPrivileged(true) +
+      Container.mixin.livenessProbe.withInitialDelaySeconds(60) +
+      Container.mixin.livenessProbe.httpGet.withPort(8123),
     local podLabels = { app: $._config.name },
 
     deployment:
