@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+#set -x
+name="$1"
+file="site/$name.extvar"
+
+[[ -f "$file" ]] || exit 0
+
+opt=""
+IFS=$'\n'
+for line in $(cat "$file"); do
+  opt="$opt --ext-str "${name}_${line%=*}=${line#*=}""
+done
+echo $opt

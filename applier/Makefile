@@ -1,4 +1,4 @@
-SOURCES := $(wildcard site/*)
+SOURCES := $(wildcard site/*.jsonnet)
 NAMES   := $(SOURCES:site/%.jsonnet=%)
 TARGETS := $(addprefix build/,$(addsuffix .json, $(NAMES:/=)))
 
@@ -11,7 +11,7 @@ apply: all
 
 build/%.json: site/%.jsonnet
 	mkdir -p build/
-	jsonnet -J vendor -J lib $< -o $@
+	jsonnet $(shell ./bin/render-extvar $*) -J vendor -J lib $< -o $@
 
 .PHONY: clean
 clean:
