@@ -17,7 +17,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
   _config+:: {
     name: 'home-assistant',
     namespace: 'home-assistant',
-    version: '0.108.5',
+    version: '0.117.4',
     port: 8123,
     image_repo: 'homeassistant/home-assistant',
     external_domain: 'home.example.com',
