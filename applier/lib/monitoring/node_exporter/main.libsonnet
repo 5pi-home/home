@@ -16,7 +16,9 @@ local containerVolumeMount = container.volumeMountsType;
   },
   node_exporter+: {
     local image = $._config.image_repo + ':v' + $._config.version,
-    local c = container.new($._config.name, image),
+    local c = container.new($._config.name, image) +
+              container.withArgs(['--path.rootfs=/host']) +
+              container.withVolumeMounts([containerVolumeMount.new("host", "/host")]),
     local podLabels = { app: $._config.name, name: $._config.name },
 
     daemonset:
@@ -28,6 +30,7 @@ local containerVolumeMount = container.volumeMountsType;
       DaemonSet.mixin.spec.template.spec.withContainers(c) +
       DaemonSet.mixin.spec.template.spec.withHostPid(true) +
       DaemonSet.mixin.spec.template.spec.withHostNetwork(true) +
+      DaemonSet.mixin.spec.template.spec.withVolumes([volume.fromHostPath('host', "/")]) +
       DaemonSet.mixin.spec.selector.withMatchLabels(podLabels) +
       DaemonSet.mixin.spec.updateStrategy.rollingUpdate.withMaxUnavailable("100%"),
 
