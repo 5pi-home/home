@@ -1,64 +1,60 @@
 {
+  "version": 1,
   "dependencies": [
     {
-      "name": "grafana",
       "source": {
         "git": {
-          "remote": "https://github.com/brancz/kubernetes-grafana",
+          "remote": "https://github.com/brancz/kubernetes-grafana.git",
           "subdir": "grafana"
         }
       },
       "version": "master"
     },
     {
-      "name": "jsonnet-libs",
       "source": {
         "git": {
-          "remote": "https://github.com/grafana/jsonnet-libs",
+          "remote": "https://github.com/coreos/kube-prometheus.git",
+          "subdir": "jsonnet/kube-prometheus/prometheus"
+        }
+      },
+      "version": "master"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/jsonnet-libs.git",
           "subdir": ""
         }
       },
       "version": "master"
     },
     {
-      "name": "ksonnet.beta.4",
       "source": {
         "git": {
-          "remote": "https://github.com/ksonnet/ksonnet-lib",
+          "remote": "https://github.com/ksonnet/ksonnet-lib.git",
           "subdir": "ksonnet.beta.4"
         }
       },
       "version": "master"
     },
     {
-      "name": "kubernetes-mixin",
       "source": {
         "git": {
-          "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin",
+          "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin.git",
           "subdir": ""
         }
       },
-      "version": "release-0.3"
+      "version": "release-0.6"
     },
     {
-      "name": "node-mixin",
       "source": {
         "git": {
-          "remote": "https://github.com/prometheus/node_exporter",
+          "remote": "https://github.com/prometheus/node_exporter.git",
           "subdir": "docs/node-mixin"
         }
       },
       "version": "master"
-    },
-    {
-      "name": "prometheus",
-      "source": {
-        "git": {
-          "remote": "https://github.com/coreos/kube-prometheus",
-          "subdir": "jsonnet/kube-prometheus/prometheus"
-        }
-      },
-      "version": "master"
     }
-  ]
+  ],
+  "legacyImports": true
 }
