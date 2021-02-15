@@ -1,3 +1,5 @@
+local util = import 'util.libsonnet';
+
 local domain = 'd.42o.de';
 
 local HomeAssistant = (import 'home_assistant/main.libsonnet') + {
@@ -9,4 +11,4 @@ local HomeAssistant = (import 'home_assistant/main.libsonnet') + {
   }
 };
 
-HomeAssistant.all
+util.toList(HomeAssistant)
