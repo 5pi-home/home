@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+import sys
+import yaml
+import json
+
+json.dump({
+    doc["metadata"]["name"] + "-" + doc["kind"].lower():
+        doc for doc in yaml.load_all(sys.stdin, Loader=yaml.SafeLoader) if doc
+}, sys.stdout)
