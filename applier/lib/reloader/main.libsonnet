@@ -10,9 +10,9 @@ local volume = k.apps.v1.deployment.mixin.spec.template.spec.volumesType;
   },
   volume_webhook(volume_name, webhook_url):
     local image = $._config.image_repo + ':v' + $._config.version;
-    local volume_mount = containerVolumeMount.new(volume_name, "/volume");
+    local volume_mount = containerVolumeMount.new(volume_name, '/volume');
 
-    container.new("reloader", image) +
+    container.new('reloader', image) +
     container.withArgs([
       '-volume-dir',
       '/volume',

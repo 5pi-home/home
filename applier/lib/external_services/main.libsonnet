@@ -8,7 +8,7 @@ local ContainerPort = K.core.v1.container.portsType;
 {
   _config+:: {
     annotations+: {
-    }
+    },
   },
   service(name, ips, ports):
     local addresses = [
@@ -17,13 +17,13 @@ local ContainerPort = K.core.v1.container.portsType;
     ];
 
     local subset = EndpointSubset.new() +
-      EndpointSubset.withAddresses(addresses);
+                   EndpointSubset.withAddresses(addresses);
 
     {
       service: Service.new(name, {}, ports) +
-        Service.mixin.metadata.withAnnotations($._config.annotations),
+               Service.mixin.metadata.withAnnotations($._config.annotations),
 
       endpoints: Endpoints.new() +
-        Endpoints.withSubsets(subset),
-    }
+                 Endpoints.withSubsets(subset),
+    },
 }

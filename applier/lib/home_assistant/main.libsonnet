@@ -1,5 +1,5 @@
-local K = import 'ksonnet.beta.4/k.libsonnet';
 local util = import 'jsonnet-libs/ksonnet-util/util.libsonnet';
+local K = import 'ksonnet.beta.4/k.libsonnet';
 local Container = K.apps.v1.deployment.mixin.spec.template.spec.containersType;
 local Deployment = K.apps.v1.deployment;
 local Namespace = K.core.v1.namespace;
@@ -26,29 +26,29 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
   },
 
   local volumeName = 'data',
-  local volume = Volume.fromHostPath(volumeName, "/data/home-assistant"),
-  local volumeMount = ContainerVolumeMount.new(volumeName, "/config"),
+  local volume = Volume.fromHostPath(volumeName, '/data/home-assistant'),
+  local volumeMount = ContainerVolumeMount.new(volumeName, '/config'),
 
   local image = $._config.image_repo + ':' + $._config.version,
   local mainContainer = Container.new($._config.name, image) +
-    Container.withArgs(["python3", "-m", "homeassistant", "--config", "/config"]) +
-    Container.withVolumeMounts([volumeMount]) + // , devVolumeMount]) +
-    Container.mixin.securityContext.withPrivileged(true) +
-    Container.mixin.livenessProbe.withInitialDelaySeconds(600) +
-    Container.mixin.livenessProbe.httpGet.withPort(8123),
+                        Container.withArgs(['python3', '-m', 'homeassistant', '--config', '/config']) +
+                        Container.withVolumeMounts([volumeMount]) +  // , devVolumeMount]) +
+                        Container.mixin.securityContext.withPrivileged(true) +
+                        Container.mixin.livenessProbe.withInitialDelaySeconds(600) +
+                        Container.mixin.livenessProbe.httpGet.withPort(8123),
   local podLabels = { app: $._config.name },
 
   deployment:
-    Deployment.new($._config.name, 1, [ mainContainer ], podLabels) +
+    Deployment.new($._config.name, 1, [mainContainer], podLabels) +
     Deployment.mixin.metadata.withNamespace($._config.namespace) +
     Deployment.mixin.metadata.withLabels(podLabels) +
     Deployment.mixin.spec.selector.withMatchLabels(podLabels) +
     Deployment.mixin.spec.template.spec.withHostNetwork(true) +
     Deployment.mixin.spec.template.spec.withNodeSelector($._config.node_selector) +
-    Deployment.mixin.spec.template.spec.withVolumes([volume]), // , devVolume]),
+    Deployment.mixin.spec.template.spec.withVolumes([volume]),  // , devVolume]),
 
   service: Service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
-    Service.mixin.metadata.withNamespace($._config.namespace),
+           Service.mixin.metadata.withNamespace($._config.namespace),
 
   ingress:
     Ingress.new() +
@@ -67,6 +67,6 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
 
   withDevice(path):: {
     deployment+:
-      util.hostVolumeMount('dev', path, path)
-  }
+      util.hostVolumeMount('dev', path, path),
+  },
 }

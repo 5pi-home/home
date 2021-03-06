@@ -29,9 +29,9 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
   },
 
   local devVolumeName = 'dev',
-  local devVolume = Volume.fromHostPath(devVolumeName, "/dev"),
-  local devVolumeMount = ContainerVolumeMount.new(devVolumeName, "/dev/ttyACM-zwave") +
-                         ContainerVolumeMount.withSubPath("ttyACM0"),
+  local devVolume = Volume.fromHostPath(devVolumeName, '/dev'),
+  local devVolumeMount = ContainerVolumeMount.new(devVolumeName, '/dev/ttyACM-zwave') +
+                         ContainerVolumeMount.withSubPath('ttyACM0'),
   local mainContainer = Container.new($._config.name, image) +
                         Container.withVolumeMounts([devVolumeMount]) +
                         Container.mixin.securityContext.withPrivileged(true),
@@ -39,7 +39,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
   local podLabels = { app: $._config.name },
 
   deployment:
-    Deployment.new($._config.name, 1, [ mainContainer ], podLabels) +
+    Deployment.new($._config.name, 1, [mainContainer], podLabels) +
     Deployment.mixin.metadata.withNamespace($._config.namespace) +
     Deployment.mixin.metadata.withLabels(podLabels) +
     Deployment.mixin.spec.selector.withMatchLabels(podLabels) +
@@ -48,7 +48,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
     util.hostVolumeMount('data', $._config.data_dir, '/usr/src/app/store'),
 
   service: Service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
-    Service.mixin.metadata.withNamespace($._config.namespace),
+           Service.mixin.metadata.withNamespace($._config.namespace),
 
   ingress:
     Ingress.new() +
@@ -71,5 +71,5 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
       $.service,
       $.ingress,
     ]
-  )
+  ),
 }

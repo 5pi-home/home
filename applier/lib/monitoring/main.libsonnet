@@ -19,7 +19,7 @@ local node_mixins = import 'node-mixins.libsonnet';
   _config+:: {
     namespace: 'monitoring',
     prometheus+:: {
-      node_selector: {}
+      node_selector: {},
     },
   },
   prometheus: (
@@ -35,7 +35,7 @@ local node_mixins = import 'node-mixins.libsonnet';
           'node.recording.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusRules),
           'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
         },
-      }
+      },
     }
   ).prometheus,
 
@@ -64,12 +64,12 @@ local node_mixins = import 'node-mixins.libsonnet';
       node_mixins
     );
     (
-      grafana +
+      grafana
       {
         _config+:: {
           namespace: 'monitoring',
           versions+:: {
-            grafana: '6.6.0'
+            grafana: '6.6.0',
           },
           prometheus+:: {
             serviceName: 'prometheus',
@@ -83,8 +83,8 @@ local node_mixins = import 'node-mixins.libsonnet';
             config: {
               sections: {
                 'auth.anonymous': {
-                  enabled: true
-                }
+                  enabled: true,
+                },
               },
             },
           },
@@ -96,7 +96,7 @@ local node_mixins = import 'node-mixins.libsonnet';
     [
       namespace.new($._config.namespace),
       $.prometheus.deployment +
-        deployment.mixin.spec.template.spec.withNodeSelector($._config.prometheus.node_selector),
+      deployment.mixin.spec.template.spec.withNodeSelector($._config.prometheus.node_selector),
       $.prometheus.service,
       $.prometheus.config_map,
       $.prometheus.serviceAccount,

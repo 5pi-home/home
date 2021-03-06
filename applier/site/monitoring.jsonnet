@@ -5,13 +5,13 @@ local Monitoring = (import 'monitoring/main.libsonnet') + {
     prometheus+: {
       host: 'prometheus.' + domain,
       node_selector: {
-        'kubernetes.io/hostname': 'openwrt'
+        'kubernetes.io/hostname': 'openwrt',
       },
     },
     grafana+: {
       host: 'grafana.' + domain,
     },
-  }
+  },
 };
 
 Monitoring.all

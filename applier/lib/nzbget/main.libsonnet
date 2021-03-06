@@ -31,46 +31,46 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
     ingress_max_body_size: '500m',
   },
 
-    local image = $._config.image_repo + ':' + $._config.version,
-    local mainContainer = Container.new($._config.name, image) +
-      Container.withArgs(["-s", "--configfile=/etc/nzbget/nzbget.conf"]),
-    local podLabels = { app: $._config.name },
+  local image = $._config.image_repo + ':' + $._config.version,
+  local mainContainer = Container.new($._config.name, image) +
+                        Container.withArgs(['-s', '--configfile=/etc/nzbget/nzbget.conf']),
+  local podLabels = { app: $._config.name },
 
-    deployment:
-      Deployment.new($._config.name, 1, [ mainContainer ], podLabels) +
-      Deployment.mixin.metadata.withNamespace($._config.namespace) +
-      Deployment.mixin.metadata.withLabels(podLabels) +
-      Deployment.mixin.spec.selector.withMatchLabels(podLabels) +
-      Deployment.mixin.spec.template.spec.withNodeSelector($._config.node_selector) +
-      Deployment.mixin.spec.template.spec.securityContext.withRunAsUser($._config.uid) +
-      util.configMapVolumeMount($.configmap, '/etc/nzbget') +
-      util.hostVolumeMount('downloads', $._config.downloads_dir, '/nzbget/downloads') +
-      util.hostVolumeMount('media', $._config.media_dir, '/media'),
+  deployment:
+    Deployment.new($._config.name, 1, [mainContainer], podLabels) +
+    Deployment.mixin.metadata.withNamespace($._config.namespace) +
+    Deployment.mixin.metadata.withLabels(podLabels) +
+    Deployment.mixin.spec.selector.withMatchLabels(podLabels) +
+    Deployment.mixin.spec.template.spec.withNodeSelector($._config.node_selector) +
+    Deployment.mixin.spec.template.spec.securityContext.withRunAsUser($._config.uid) +
+    util.configMapVolumeMount($.configmap, '/etc/nzbget') +
+    util.hostVolumeMount('downloads', $._config.downloads_dir, '/nzbget/downloads') +
+    util.hostVolumeMount('media', $._config.media_dir, '/media'),
 
 
-    configmap: ConfigMap.new($._config.name, { "nzbget.conf": $._config.config }) +
-      ConfigMap.mixin.metadata.withNamespace($._config.namespace),
+  configmap: ConfigMap.new($._config.name, { 'nzbget.conf': $._config.config }) +
+             ConfigMap.mixin.metadata.withNamespace($._config.namespace),
 
-    service: Service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
-      Service.mixin.metadata.withNamespace($._config.namespace),
+  service: Service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
+           Service.mixin.metadata.withNamespace($._config.namespace),
 
-    ingress:
-      Ingress.new() +
-      Ingress.mixin.metadata.withName($._config.name) +
-      Ingress.mixin.metadata.withNamespace($._config.namespace) +
-      Ingress.mixin.metadata.withAnnotations({
-          'nginx.ingress.kubernetes.io/proxy-body-size': $._config.ingress_max_body_size,
-      }) +
-      Ingress.mixin.spec.withRules([
-        IngressRule.new() +
-        IngressRule.withHost($._config.external_domain) +
-        IngressRule.mixin.http.withPaths([
-          HTTPIngressPath.new() +
-          HTTPIngressPath.withPath('/') +
-          HTTPIngressPath.mixin.backend.withServiceName($._config.name) +
-          HTTPIngressPath.mixin.backend.withServicePort($._config.port),
-        ]),
+  ingress:
+    Ingress.new() +
+    Ingress.mixin.metadata.withName($._config.name) +
+    Ingress.mixin.metadata.withNamespace($._config.namespace) +
+    Ingress.mixin.metadata.withAnnotations({
+      'nginx.ingress.kubernetes.io/proxy-body-size': $._config.ingress_max_body_size,
+    }) +
+    Ingress.mixin.spec.withRules([
+      IngressRule.new() +
+      IngressRule.withHost($._config.external_domain) +
+      IngressRule.mixin.http.withPaths([
+        HTTPIngressPath.new() +
+        HTTPIngressPath.withPath('/') +
+        HTTPIngressPath.mixin.backend.withServiceName($._config.name) +
+        HTTPIngressPath.mixin.backend.withServicePort($._config.port),
       ]),
+    ]),
   all: K.core.v1.list.new(
     [
       Namespace.new($._config.namespace),
@@ -79,5 +79,5 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
       $.service,
       $.ingress,
     ]
-  )
+  ),
 }
