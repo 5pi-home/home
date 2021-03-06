@@ -27,9 +27,10 @@ local prometheus_config = import 'config.libsonnet';
     image_repo: 'prom/prometheus',
     external_domain: 'prometheus.example.com',
     external_proto: 'http',
-    config_files+: {
-      'prometheus.yaml': std.manifestYamlDoc(prometheus_config),
-    }
+  },
+  prometheus_config+: prometheus_config,
+  config_files+: {
+    'prometheus.yaml': std.manifestYamlDoc($.prometheus_config)
   },
   prometheus+: {
     local dataVolumeName = 'data',
@@ -118,7 +119,7 @@ local prometheus_config = import 'config.libsonnet';
     service: service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
       service.mixin.metadata.withNamespace($._config.namespace),
 
-    config_map: configMap.new($._config.name, $._config.config_files) +
+    config_map: configMap.new($._config.name, $.config_files) +
       configMap.mixin.metadata.withNamespace($._config.namespace),
 
     ingress:

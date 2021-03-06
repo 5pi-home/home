@@ -28,13 +28,13 @@ local node_mixins = import 'node-mixins.libsonnet';
       _config+:: {
         namespace: $._config.namespace,
         external_domain: $._config.prometheus.host,
-        config_files+: {
-          'kubernetes.recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
-          'kubernetes.alerting.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
+      },
+      config_files+: {
+        'kubernetes.recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
+        'kubernetes.alerting.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
 
-          'node.recording.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusRules),
-          'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
-        },
+        'node.recording.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusRules),
+        'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
       },
     }
   ).prometheus,
