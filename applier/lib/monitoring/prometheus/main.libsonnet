@@ -32,7 +32,6 @@ local prometheus_config = import 'config.libsonnet';
   config_files+: {
     'prometheus.yaml': std.manifestYamlDoc($.prometheus_config)
   },
-  prometheus+: {
     local dataVolumeName = 'data',
     local configVolumeName = 'config',
     local datavm = containerVolumeMount.new(dataVolumeName, "/prometheus"),
@@ -40,7 +39,11 @@ local prometheus_config = import 'config.libsonnet';
     local configvm = containerVolumeMount.new(configVolumeName, "/etc/prometheus"),
     local configv = volume.withName(configVolumeName) + volume.mixin.configMap.withName("prometheus"),
     local image = $._config.image_repo + ':v' + $._config.version,
-    local mainContainer = container.new("prometheus", image) +
+    local reloaderContainer = reloader.volume_webhook(configVolumeName, "http://localhost:9090/-/reload"),
+    local podLabels = { app: $._config.name },
+    local serviceAccountName = 'prometheus',
+
+    container: container.new("prometheus", image) +
       container.withArgs([
         '--config.file=/etc/prometheus/prometheus.yaml',
         '--log.level=info',
@@ -50,9 +53,6 @@ local prometheus_config = import 'config.libsonnet';
         '--web.external-url=' + $._config.external_proto + '://' + $._config.external_domain,
       ]) +
       container.withVolumeMounts([datavm, configvm]),
-    local reloaderContainer = reloader.volume_webhook(configVolumeName, "http://localhost:9090/-/reload"),
-    local podLabels = { app: $._config.name },
-    local serviceAccountName = 'prometheus',
 
     serviceAccount:
       local serviceAccount = k.core.v1.serviceAccount;
@@ -106,8 +106,8 @@ local prometheus_config = import 'config.libsonnet';
       clusterRoleBinding.withSubjects([{ kind: 'ServiceAccount', name: 'prometheus', namespace: $._config.namespace }]),
 
 
-    deployment:
-      deployment.new($._config.name, 1, [ mainContainer, reloaderContainer ], podLabels) +
+    deployment+:
+      deployment.new($._config.name, 1, [ $.container, reloaderContainer ], podLabels) +
       deployment.mixin.metadata.withNamespace($._config.namespace) +
       deployment.mixin.metadata.withLabels(podLabels) +
       deployment.mixin.spec.selector.withMatchLabels(podLabels) +
@@ -136,5 +136,4 @@ local prometheus_config = import 'config.libsonnet';
           httpIngressPath.mixin.backend.withServicePort($._config.port),
         ]),
       ]),
-  }
 }

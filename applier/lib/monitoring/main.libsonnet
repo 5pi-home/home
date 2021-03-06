@@ -22,7 +22,7 @@ local node_mixins = import 'node-mixins.libsonnet';
       node_selector: {},
     },
   },
-  prometheus: (
+  prometheus+: (
     (import 'prometheus/main.libsonnet') +
     {
       _config+:: {
@@ -37,7 +37,7 @@ local node_mixins = import 'node-mixins.libsonnet';
         'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
       },
     }
-  ).prometheus,
+  ),
 
   blackbox_exporter: (
     (import 'blackbox_exporter/main.libsonnet') +

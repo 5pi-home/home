@@ -2,7 +2,7 @@
   rule_files: [
     '/etc/prometheus/*.rules.yaml'
   ],
-  scrape_configs: [
+  scrape_configs+: [
     {
       bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
       job_name: 'kube-apiserver',
