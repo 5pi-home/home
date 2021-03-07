@@ -15,13 +15,11 @@ local plutoCertv = volume.withName("kubelet-pluto") + { secret: { secretName: "k
 local Monitoring = (import 'monitoring/main.libsonnet') + {
   _config+:: {
     prometheus+: {
-      host: 'prometheus.' + domain,
-      node_selector: {
-        'kubernetes.io/hostname': 'openwrt',
-      },
+      external_domain: 'prometheus.' + domain,
+      storage_class: 'zfs-stripe-nvme',
     },
     grafana+: {
-      host: 'grafana.' + domain,
+      external_domain: 'grafana.' + domain,
     },
   },
   prometheus+: {
