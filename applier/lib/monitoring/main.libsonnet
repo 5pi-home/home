@@ -25,9 +25,8 @@ local node_mixins = import 'node-mixins.libsonnet';
   prometheus+: (
     (import 'prometheus/main.libsonnet') +
     {
-      _config+:: {
+      _config+:: $._config.prometheus + {
         namespace: $._config.namespace,
-        external_domain: $._config.prometheus.host,
       },
       config_files+: {
         'kubernetes.recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
@@ -103,6 +102,7 @@ local node_mixins = import 'node-mixins.libsonnet';
       $.prometheus.clusterRole,
       $.prometheus.clusterRoleBinding,
       $.prometheus.ingress,
+      $.prometheus.pvc,
 
       $.blackbox_exporter.deployment,
       $.blackbox_exporter.service,
@@ -125,7 +125,7 @@ local node_mixins = import 'node-mixins.libsonnet';
       ingress.mixin.metadata.withNamespace($._config.namespace) +
       ingress.mixin.spec.withRules([
         ingressRule.new() +
-        ingressRule.withHost($._config.grafana.host) +
+        ingressRule.withHost($._config.grafana.external_domain) +
         ingressRule.mixin.http.withPaths([
           httpIngressPath.new() +
           httpIngressPath.withPath('/') +
