@@ -8,18 +8,8 @@
           "subdir": "grafana"
         }
       },
-      "version": "539a90dbf63c812ad0194d8078dd776868a11c81",
-      "sum": "b8faWX1qqLGyN67sA36oRqYZ5HX+tHBRMPtrWRqIysE="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/coreos/kube-prometheus.git",
-          "subdir": "jsonnet/kube-prometheus/prometheus"
-        }
-      },
-      "version": "8550ac35bf491ae031397cb1310d989bebd09034",
-      "sum": "hEo3wJNCAM7Ze5fkRFjp9Ec79x3ItKMo9QYHDrHaJi0="
+      "version": "8ea4e7bc04b1bf5e9bd99918ca28c6271b42be0e",
+      "sum": "muenICtKXABk6MZZHCZD2wCbmtiE96GwWRMGa1Rg+wA="
     },
     {
       "source": {
@@ -28,8 +18,8 @@
           "subdir": "grafonnet"
         }
       },
-      "version": "f3ee1d810858cf556d25f045b53cb0f1fd10b94e",
-      "sum": "14YBZUP/cl8qi9u86xiuUS4eXQrEAam+4GSg6i9n9Ys="
+      "version": "daad85cf3fad3580e58029414630e29956aefe21",
+      "sum": "zkOBVXtNSGlOdbm5TRCbEik7c/Jk+btbJqaE9qW8j3Y="
     },
     {
       "source": {
@@ -38,8 +28,8 @@
           "subdir": ""
         }
       },
-      "version": "c9386599b1d9323469b7bc18192f3c7e4c9af66a",
-      "sum": "DqqlQ7KIFl9ZRcb14TRTKIkmhPCkvtZzova58o9qZts="
+      "version": "0558f2c1e69fe2c4b4a7c8ba7088678f091c1151",
+      "sum": "XInWLj9pjLu0LoURn7dBhlCnroAJBYVYPqWewYA20FI="
     },
     {
       "source": {
@@ -48,8 +38,8 @@
           "subdir": "grafana-builder"
         }
       },
-      "version": "e92000a708ded5bde1dd332a8e7457d0b39b7928",
-      "sum": "slxrtftVDiTlQK22ertdfrg4Epnq97gdrLI63ftUfaE="
+      "version": "0558f2c1e69fe2c4b4a7c8ba7088678f091c1151",
+      "sum": "GRf2GvwEU4jhXV+JOonXSZ4wdDv8mnHBPCQ6TUVd+g8="
     },
     {
       "source": {
@@ -60,17 +50,6 @@
       },
       "version": "5e0d0738721f3c190198818ef7f9414dcee9167f",
       "sum": "OXTug8dGtUKG5MGkSdEvMllGfPitqG1kdTk4pPVSH8k="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/ksonnet/ksonnet-lib.git",
-          "subdir": ""
-        }
-      },
-      "version": "0d2f82676817bbf9e4acf6495b2090205f323b9f",
-      "sum": "h28BXZ7+vczxYJ2sCt8JuR9+yznRtU/iA6DCpQUrtEg=",
-      "name": "ksonnet"
     },
     {
       "source": {
@@ -89,8 +68,8 @@
           "subdir": ""
         }
       },
-      "version": "68f82d2a428d91df57e9af43739981a6a8ede897",
-      "sum": "J/tuXi0Z8GRHo63pM17YFIyk4QgkFuMcQ20mAxi1flM="
+      "version": "1941868d86a7c37e5505a14e3d567bda90e80357",
+      "sum": "ypWxhZVFWF53k7qIkSpUvnI6IGyFBNKmgrzjNtLwMIM="
     },
     {
       "source": {
@@ -99,18 +78,8 @@
           "subdir": "lib/promgrafonnet"
         }
       },
-      "version": "3cc34f995c31ed6e1e92024fed1912d63569c39f",
-      "sum": "VhgBM39yv0f4bKv8VfGg4FXkg573evGDRalip9ypKbc="
-    },
-    {
-      "source": {
-        "git": {
-          "remote": "https://github.com/metalmatze/slo-libsonnet.git",
-          "subdir": "slo-libsonnet"
-        }
-      },
-      "version": "437c402c5f3ad86c3c16db8471f1649284fef0ee",
-      "sum": "2Zcyku1f558VrUpMaJnI78fahDksPLcS1idmxxwcQ7Q="
+      "version": "47cc48fe091adee2bde95eac55d7936f64c6bf63",
+      "sum": "zv7hXGui6BfHzE9wPatHI/AGZa4A2WKo6pq7ZdqBsps="
     },
     {
       "source": {
@@ -119,8 +88,8 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "fa4edd700ebc1b3614bcd953c215d3f2ab2e0b35",
-      "sum": "ZwrC0+4o1xD6+oPBu1p+rBXLlf6pMBD9rT8ygyl2aW0="
+      "version": "f1ea70b649ca3c569096202a9cfb9743d6854982",
+      "sum": "A/LSE5RHFMexVhHTJxjF3HRQc7FxPdjTNSKc+XaLHDM="
     }
   ],
   "legacyImports": false
