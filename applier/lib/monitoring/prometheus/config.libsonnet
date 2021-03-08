@@ -1,4 +1,7 @@
 {
+  global: {
+    scrape_interval: '30s'
+  },
   rule_files: [
     '/etc/prometheus/*.rules.yaml'
   ],
