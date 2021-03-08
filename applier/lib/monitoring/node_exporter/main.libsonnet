@@ -9,7 +9,7 @@ local containerVolumeMount = container.volumeMountsType;
   _config+:: {
     name: 'node-exporter',
     namespace: 'monitoring',
-    version: '1.0.0-rc.0',
+    version: '1.1.2',
     port: 9100,
     uid: 1000,
     image_repo: 'prom/node-exporter',

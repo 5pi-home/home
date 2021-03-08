@@ -1,17 +1,17 @@
-local K = import 'ksonnet.beta.4/k.libsonnet';
-local util = (import 'jsonnet-libs/ksonnet-util/kausal.libsonnet').util;
+local k = import 'ksonnet.beta.4/k.libsonnet';
+local util = (import 'jsonnet-libs/ksonnet-util/util.libsonnet');
 
-local Container = K.apps.v1.deployment.mixin.spec.template.spec.containersType;
-local Deployment = K.apps.v1.deployment;
-local Namespace = K.core.v1.namespace;
-local ConfigMap = K.core.v1.configMap;
-local Service = K.core.v1.service;
-local ServicePort = K.core.v1.service.mixin.spec.portsType;
+local Container = k.apps.v1.deployment.mixin.spec.template.spec.containersType;
+local Deployment = k.apps.v1.deployment;
+local Namespace = k.core.v1.namespace;
+local ConfigMap = k.core.v1.configMap;
+local Service = k.core.v1.service;
+local ServicePort = k.core.v1.service.mixin.spec.portsType;
 
-local Volume = K.apps.v1.deployment.mixin.spec.template.spec.volumesType;
+local Volume = k.apps.v1.deployment.mixin.spec.template.spec.volumesType;
 local ContainerVolumeMount = Container.volumeMountsType;
 
-local Ingress = K.extensions.v1beta1.ingress;
+local Ingress = k.extensions.v1beta1.ingress;
 local IngressRule = Ingress.mixin.spec.rulesType;
 local HTTPIngressPath = IngressRule.mixin.http.pathsType;
 
@@ -23,8 +23,8 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
     port: 6789,
     image_repo: 'fish/nzbget',
     external_domain: 'home.example.com',
-    downloads_dir: '/hdd/nzbget',
-    media_dir: '/hdd/media',
+    media_dir: '/pool-mirror/media',
+    storage_class: 'default',
     uid: 1000,
     node_selector: {},
     config: '',
@@ -36,19 +36,27 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
                         Container.withArgs(['-s', '--configfile=/etc/nzbget/nzbget.conf']),
   local podLabels = { app: $._config.name },
 
+  pvc: k.core.v1.persistentVolumeClaim.new() +
+       k.core.v1.persistentVolumeClaim.mixin.metadata.withName('nzbget') +
+       k.core.v1.persistentVolumeClaim.mixin.metadata.withNamespace($._config.namespace) +
+       k.core.v1.persistentVolumeClaim.mixin.spec.withAccessModes('ReadWriteOnce') +
+       k.core.v1.persistentVolumeClaim.mixin.spec.resources.withRequests({storage: '20Gi'}) +
+       k.core.v1.persistentVolumeClaim.mixin.spec.withStorageClassName($._config.storage_class),
+
   deployment:
     Deployment.new($._config.name, 1, [mainContainer], podLabels) +
     Deployment.mixin.metadata.withNamespace($._config.namespace) +
     Deployment.mixin.metadata.withLabels(podLabels) +
     Deployment.mixin.spec.selector.withMatchLabels(podLabels) +
+    Deployment.mixin.spec.strategy.withType('Recreate') +
     Deployment.mixin.spec.template.spec.withNodeSelector($._config.node_selector) +
     Deployment.mixin.spec.template.spec.securityContext.withRunAsUser($._config.uid) +
+    util.pvcVolumeMount($.pvc.metadata.name, '/nzbget/downloads') +
     util.configMapVolumeMount($.configmap, '/etc/nzbget') +
-    util.hostVolumeMount('downloads', $._config.downloads_dir, '/nzbget/downloads') +
     util.hostVolumeMount('media', $._config.media_dir, '/media'),
 
 
-  configmap: ConfigMap.new($._config.name, { 'nzbget.conf': $._config.config }) +
+  configmap: ConfigMap.new($._config.name + '-config', { 'nzbget.conf': $._config.config }) +
              ConfigMap.mixin.metadata.withNamespace($._config.namespace),
 
   service: Service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
@@ -71,10 +79,11 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
         HTTPIngressPath.mixin.backend.withServicePort($._config.port),
       ]),
     ]),
-  all: K.core.v1.list.new(
+  all: k.core.v1.list.new(
     [
       Namespace.new($._config.namespace),
       $.configmap,
+      $.pvc,
       $.deployment,
       $.service,
       $.ingress,

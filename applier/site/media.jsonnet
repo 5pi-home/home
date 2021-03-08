@@ -8,10 +8,8 @@ local config = (importstr 'media/nzbget.conf') % {
 local NzbGet = (import 'nzbget/main.libsonnet') + {
   _config+:: {
     external_domain: 'nzbget.' + domain,
-    node_selector: {
-      'kubernetes.io/hostname': 'openwrt',
-    },
     config: config,
+    storage_class: 'zfs-stripe-nvme',
   },
 };
 NzbGet.all
