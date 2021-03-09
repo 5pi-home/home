@@ -19,7 +19,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
   _config+:: {
     name: 'nzbget',
     namespace: 'media',
-    version: 'v21.0-r2302-0',
+    version: 'v21.0',
     port: 6789,
     image_repo: 'fish/nzbget',
     external_domain: 'home.example.com',
