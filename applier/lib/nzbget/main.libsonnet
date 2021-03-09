@@ -40,7 +40,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
        k.core.v1.persistentVolumeClaim.mixin.metadata.withName('nzbget') +
        k.core.v1.persistentVolumeClaim.mixin.metadata.withNamespace($._config.namespace) +
        k.core.v1.persistentVolumeClaim.mixin.spec.withAccessModes('ReadWriteOnce') +
-       k.core.v1.persistentVolumeClaim.mixin.spec.resources.withRequests({storage: '20Gi'}) +
+       k.core.v1.persistentVolumeClaim.mixin.spec.resources.withRequests({storage: '100Gi'}) +
        k.core.v1.persistentVolumeClaim.mixin.spec.withStorageClassName($._config.storage_class),
 
   deployment:
