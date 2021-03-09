@@ -7,6 +7,7 @@ k.core.v1.list.new([
     recordsize: "4k",
     compression: "off",
     dedup: "off",
+    thinprovision: "yes",
     fstype: "zfs",
     poolname: "pool-" + pool,
   }) +
