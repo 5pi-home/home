@@ -18,12 +18,12 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
 {
   _config+:: {
     name: 'nzbget',
-    namespace: 'media',
+    namespace: 'default',
     version: 'v21.0',
     port: 6789,
     image_repo: 'fish/nzbget',
-    external_domain: 'home.example.com',
-    media_dir: '/pool-mirror/media',
+    external_domain: error 'Must specify external_domain',
+    media_path: error 'Must specify media_path',
     storage_class: 'default',
     uid: 1000,
     node_selector: {},
@@ -53,7 +53,7 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
     Deployment.mixin.spec.template.spec.securityContext.withRunAsUser($._config.uid) +
     util.pvcVolumeMount($.pvc.metadata.name, '/nzbget/downloads') +
     util.configMapVolumeMount($.configmap, '/etc/nzbget') +
-    util.hostVolumeMount('media', $._config.media_dir, '/media'),
+    util.hostVolumeMount('media', $._config.media_path, '/media'),
 
 
   configmap: ConfigMap.new($._config.name + '-config', { 'nzbget.conf': $._config.config }) +
