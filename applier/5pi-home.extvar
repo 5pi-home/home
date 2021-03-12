@@ -1,2 +1,0 @@
-server1_username=$(pass home/usenet/ewaka/username)
-server1_password=$(pass home/usenet/ewaka/password)

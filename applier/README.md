@@ -27,6 +27,8 @@ Examples:
 - Papermc
 - Overviewer
 
+#
+
 # Conventions
 - lib/ contains reusable anythings (FIXME: Distinguish between mixins and
   opinionated apps)

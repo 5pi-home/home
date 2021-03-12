@@ -1,78 +1,112 @@
-local domain = 'd.42o.de';
-
 local k = import 'ksonnet.beta.4/k.libsonnet';
-local container = k.apps.v1.deployment.mixin.spec.template.spec.containersType;
-local volume = k.apps.v1.deployment.mixin.spec.template.spec.volumesType;
-local containerVolumeMount = container.volumeMountsType;
 local configMap = k.core.v1.configMap;
+local namespace = k.core.v1.namespace;
+local container = k.apps.v1.deployment.mixin.spec.template.spec.containersType;
+local deployment = k.apps.v1.deployment;
+local ingress = k.extensions.v1beta1.ingress;
+local ingressRule = ingress.mixin.spec.rulesType;
+local httpIngressPath = ingressRule.mixin.http.pathsType;
+local volume = k.apps.v1.deployment.mixin.spec.template.spec.volumesType;
+local containerPort = container.portsType;
+local containerVolumeMount = container.volumeMountsType;
+local service = k.core.v1.service;
+local servicePort = k.core.v1.service.mixin.spec.portsType;
 
-local plutoCAvm = containerVolumeMount.new("kubelet-pluto-ca", "/etc/prometheus/pluto-kubelet-ca");
-local plutoCAv = volume.withName("kubelet-pluto-ca") + volume.mixin.configMap.withName("kubelet-pluto-ca");
-
-local plutoCertvm = containerVolumeMount.new("kubelet-pluto", "/etc/prometheus/pluto-kubelet");
-local plutoCertv = volume.withName("kubelet-pluto") + { secret: { secretName: "kubelet-pluto" } };
-
-local Monitoring = (import 'monitoring/main.libsonnet') + {
+local node_mixins = import 'node-mixin/mixin.libsonnet';
+local kubernetes_mixins = (import 'kubernetes-mixin/mixin.libsonnet') + {
   _config+:: {
-    prometheus+: {
-      external_domain: 'prometheus.' + domain,
-      storage_class: 'zfs-stripe-nvme',
-    },
-    grafana+: {
-      external_domain: 'grafana.' + domain,
-    },
-  },
-  prometheus+: {
-    prometheus_config+: {
-      scrape_configs+: [{
-        job_name: 'pluto-node-exporter',
-        static_configs: [{
-          targets: [ "78.47.234.52:9100" ],
-        }],
-      }, {
-        job_name: 'pluto-kubelet',
-        scheme: 'https',
-        tls_config: {
-          ca_file: "/etc/prometheus/pluto-kubelet-ca/ca.pem",
-          cert_file: "/etc/prometheus/pluto-kubelet/tls.crt",
-          key_file: "/etc/prometheus/pluto-kubelet/tls.key",
-          insecure_skip_verify: true
-        },
-        static_configs: [{
-          targets: [
-            "78.47.234.52:10250",
-            "78.47.234.52:10250"
-          ],
-        }],
-      }, {
-        job_name: 'pluto-cadvisor',
-        scheme: 'https',
-        tls_config: {
-          ca_file: "/etc/prometheus/pluto-kubelet-ca/ca.pem",
-          cert_file: "/etc/prometheus/pluto-kubelet/tls.crt",
-          key_file: "/etc/prometheus/pluto-kubelet/tls.key",
-          insecure_skip_verify: true
-        },
-        metrics_path: '/metrics/cadvisor',
-        static_configs: [{
-          targets: [
-            "78.47.234.52:10250",
-          ],
-        }]
-      }]
-    },
-    container+: {
-      volumeMounts+: [plutoCAvm, plutoCertvm ]
-    },
-    deployment+: {
-      spec+: {
-        template+: {
-          spec+: {
-            volumes+: [plutoCAv, plutoCertv]
-          }
-        }
-      }
-    }
+    kubeSchedulerSelector: 'kubernetes_name="kube-scheduler"',
+    kubeControllerManagerSelector: 'kubernetes_name="kube-controller-manager"',
   },
 };
-Monitoring.all
+
+
+local grafana =
+  (import 'grafana/grafana.libsonnet') +
+  {
+    _config+:: {
+      namespace: 'monitoring',
+      versions+:: {
+        grafana: '6.6.0',
+      },
+      prometheus+:: {
+        serviceName: 'prometheus',
+      },
+      grafana+:: {
+        dashboards: (kubernetes_mixins + node_mixins).grafanaDashboards,  // + node_mixins.grafanaDashboards},
+        container: {
+          requests: { memory: '80Mi' },
+          limits: { memory: '80Mi' },
+        },
+        config: {
+          sections: {
+            'auth.anonymous': {
+              enabled: true,
+            },
+          },
+        },
+      },
+    },
+  };
+
+{
+  _config+:: {
+    namespace: 'monitoring',
+    prometheus+:: {
+      node_selector: {},
+    },
+  },
+  prometheus+: (
+    (import 'apps/prometheus/main.libsonnet') +
+    {
+      _config+:: $._config.prometheus {
+        namespace: $._config.namespace,
+      },
+      config_files+: {
+        'kubernetes.recording.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusRules),
+        'kubernetes.alerting.rules.yaml': std.manifestYamlDoc(kubernetes_mixins.prometheusAlerts),
+
+        'node.recording.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusRules),
+        'node.alerting.rules.yaml': std.manifestYamlDoc(node_mixins.prometheusAlerts),
+      },
+    }
+  ),
+
+  blackbox_exporter: (
+    (import 'apps/blackbox_exporter/main.libsonnet') +
+    {
+      _config+:: {
+        namespace: $._config.namespace,
+      },
+    }
+  ).blackbox_exporter,
+
+  node_exporter: (
+    (import 'apps/node_exporter/main.libsonnet') +
+    {
+      _config+:: {
+        namespace: $._config.namespace,
+      },
+    }
+  ).node_exporter,
+
+  grafana: grafana.grafana {
+    dashboardDefinitions:: super.dashboardDefinitions,
+    ingress: ingress.new() +
+             ingress.mixin.metadata.withName('grafana') +
+             ingress.mixin.metadata.withNamespace($._config.namespace) +
+             ingress.mixin.spec.withRules([
+               ingressRule.new() +
+               ingressRule.withHost($._config.grafana.external_domain) +
+               ingressRule.mixin.http.withPaths([
+                 httpIngressPath.new() +
+                 httpIngressPath.withPath('/') +
+                 httpIngressPath.mixin.backend.withServiceName('grafana') +
+                 httpIngressPath.mixin.backend.withServicePort(3000),
+               ]),
+             ]),
+  } + {
+    [dashboard.metadata.name]: dashboard
+    for dashboard in grafana.grafana.dashboardDefinitions
+  },
+}

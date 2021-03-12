@@ -79,14 +79,4 @@ local HTTPIngressPath = IngressRule.mixin.http.pathsType;
         HTTPIngressPath.mixin.backend.withServicePort($._config.port),
       ]),
     ]),
-  all: k.core.v1.list.new(
-    [
-      Namespace.new($._config.namespace),
-      $.configmap,
-      $.pvc,
-      $.deployment,
-      $.service,
-      $.ingress,
-    ]
-  ),
 }

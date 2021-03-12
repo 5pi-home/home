@@ -13,7 +13,7 @@ local ingress = k.extensions.v1beta1.ingress;
 local ingressRule = ingress.mixin.spec.rulesType;
 local httpIngressPath = ingressRule.mixin.http.pathsType;
 
-local reloader = import 'reloader/main.libsonnet';
+local reloader = import 'lib/reloader/main.libsonnet';
 
 local prometheus_config = import 'config.libsonnet';
 
@@ -29,9 +29,9 @@ local prometheus_config = import 'config.libsonnet';
     external_proto: 'http',
     storage_class: 'default',
   },
-  prometheus_config+: prometheus_config,
-  config_files+: {
-    'prometheus.yaml': std.manifestYamlDoc($.prometheus_config)
+  prometheus_config:: prometheus_config,
+  config_files:: {
+    'prometheus.yaml': std.manifestYamlDoc($.prometheus_config),
   },
   local image = $._config.image_repo + ':v' + $._config.version,
   local podLabels = { app: $._config.name },
@@ -41,25 +41,25 @@ local prometheus_config = import 'config.libsonnet';
        k.core.v1.persistentVolumeClaim.mixin.metadata.withName('prometheus') +
        k.core.v1.persistentVolumeClaim.mixin.metadata.withNamespace($._config.namespace) +
        k.core.v1.persistentVolumeClaim.mixin.spec.withAccessModes('ReadWriteOnce') +
-       k.core.v1.persistentVolumeClaim.mixin.spec.resources.withRequests({storage: '5Gi'}) +
+       k.core.v1.persistentVolumeClaim.mixin.spec.resources.withRequests({ storage: '5Gi' }) +
        k.core.v1.persistentVolumeClaim.mixin.spec.withStorageClassName($._config.storage_class),
 
-  data_volume: volume.withName('data') + volume.mixin.persistentVolumeClaim.withClaimName($.pvc.metadata.name),
-  config_volume: volume.withName('config') + volume.mixin.configMap.withName("prometheus"),
+  data_volume:: volume.withName('data') + volume.mixin.persistentVolumeClaim.withClaimName($.pvc.metadata.name),
+  config_volume:: volume.withName('config') + volume.mixin.configMap.withName('prometheus'),
 
-  container: container.new("prometheus", image) +
-    container.withArgs([
-      '--config.file=/etc/prometheus/prometheus.yaml',
-      '--log.level=info',
-      '--storage.tsdb.path=/prometheus',
-      '--web.enable-lifecycle',
-      '--web.enable-admin-api',
-      '--web.external-url=' + $._config.external_proto + '://' + $._config.external_domain,
-    ]) +
-    container.withVolumeMounts([
-      containerVolumeMount.new($.data_volume.name, "/prometheus"),
-      containerVolumeMount.new($.config_volume.name, "/etc/prometheus")
-    ]),
+  container:: container.new('prometheus', image) +
+              container.withArgs([
+                '--config.file=/etc/prometheus/prometheus.yaml',
+                '--log.level=info',
+                '--storage.tsdb.path=/prometheus',
+                '--web.enable-lifecycle',
+                '--web.enable-admin-api',
+                '--web.external-url=' + $._config.external_proto + '://' + $._config.external_domain,
+              ]) +
+              container.withVolumeMounts([
+                containerVolumeMount.new($.data_volume.name, '/prometheus'),
+                containerVolumeMount.new($.config_volume.name, '/etc/prometheus'),
+              ]),
 
   serviceAccount:
     local serviceAccount = k.core.v1.serviceAccount;
@@ -81,11 +81,11 @@ local prometheus_config = import 'config.libsonnet';
                      ]) +
                      policyRule.withVerbs(['get', 'list', 'watch']);
     local extensionRule = policyRule.new() +
-                     policyRule.withApiGroups(['extensions']) +
-                     policyRule.withResources([
-                       'ingresses',
-                     ]) +
-                     policyRule.withVerbs(['get', 'list', 'watch']);
+                          policyRule.withApiGroups(['extensions']) +
+                          policyRule.withResources([
+                            'ingresses',
+                          ]) +
+                          policyRule.withVerbs(['get', 'list', 'watch']);
 
     local nodeMetricsRule = policyRule.new() +
                             policyRule.withApiGroups(['']) +
@@ -114,7 +114,7 @@ local prometheus_config = import 'config.libsonnet';
 
 
   deployment+:
-    deployment.new($._config.name, 1, [ $.container, reloader.volume_webhook('config', "http://localhost:9090/-/reload")], podLabels) +
+    deployment.new($._config.name, 1, [$.container, reloader.volume_webhook('config', 'http://localhost:9090/-/reload')], podLabels) +
     deployment.mixin.metadata.withNamespace($._config.namespace) +
     deployment.mixin.metadata.withLabels(podLabels) +
     deployment.mixin.spec.selector.withMatchLabels(podLabels) +
@@ -124,13 +124,13 @@ local prometheus_config = import 'config.libsonnet';
     deployment.mixin.spec.template.spec.withVolumes([
       $.data_volume,
       $.config_volume,
-   ]),
+    ]),
 
   service: service.new($._config.name, { app: $._config.name }, { port: $._config.port }) +
-    service.mixin.metadata.withNamespace($._config.namespace),
+           service.mixin.metadata.withNamespace($._config.namespace),
 
   config_map: configMap.new($._config.name, $.config_files) +
-    configMap.mixin.metadata.withNamespace($._config.namespace),
+              configMap.mixin.metadata.withNamespace($._config.namespace),
 
   ingress:
     ingress.new() +

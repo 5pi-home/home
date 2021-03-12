@@ -1,29 +1,24 @@
-local domain = 'd.42o.de';
-local namespace = 'media';
-local media_path = '/pool-mirror/media';
-
-local config = (importstr 'media/nzbget.conf') % {
-  server1_username: std.extVar('media_server1_username'),
-  server1_password: std.extVar('media_server1_password'),
-};
-
-local NzbGet = (import 'nzbget/main.libsonnet') + {
-  _config+:: {
-    external_domain: 'nzbget.' + domain,
-    namespace: namespace,
-    config: config,
-    storage_class: 'zfs-stripe-nvme',
-    media_path: media_path,
+{
+  _config:: {
+    domain: error 'Must define domain',
+    namespace: 'media',
   },
-};
 
-local sonarr = (import 'sonarr/main.jsonnet') + {
-  _config+:: {
-    namespace: namespace,
-    host: 'sonarr.' + domain,
-    storage_class: 'zfs-stripe-nvme',
-    media_path: media_path,
+
+  nzbget: (import 'apps/nzbget/main.libsonnet') + {
+    _config+:: {
+      external_domain: 'nzbget.' + $._config.domain,
+      namespace: $._config.namespace,
+      config: (importstr 'media/nzbget.conf') % $._config.usenet, // FIXME: Lets generate the config from jsonnet
+      storage_class: $._config.storage_class,
+      media_path: $._config.media_path,
+    },
   },
-};
 
-NzbGet.all + sonarr.all
+  sonarr: (import 'apps/sonarr/main.jsonnet').new({
+    namespace: $._config.namespace,
+    host: 'sonarr.' + $._config.domain,
+    storage_class: $._config.storage_class,
+    media_path: $._config.media_path,
+  }),
+}
