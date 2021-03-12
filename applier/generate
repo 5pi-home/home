@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+site=$1
+args="${2:-$site.args}"
+
+opts=""
+[[ -s "$args" ]] && opts=($(cat "$args"))
+
+eval -- jsonnet "${opts[@]}" -J vendor/ -J . 5pi-home.jsonnet -Scm "build/$site"

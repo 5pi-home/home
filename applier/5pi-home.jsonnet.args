@@ -1,0 +1,2 @@
+--ext-str media_server1_username=$(pass home/usenet/ewaka/username)
+--ext-str media_server1_password=$(pass home/usenet/ewaka/password)

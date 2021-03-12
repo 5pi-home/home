@@ -1,0 +1,2 @@
+--ext-str media_server1_username="foo"
+--ext-str media_server1_password="bar"
