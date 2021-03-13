@@ -3,6 +3,12 @@ local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
 local domain = 'd.42o.de';
 local site = (import 'lib/site.jsonnet');
 
+local zfs = (import 'stacks/zfs.jsonnet') + {
+  _config+: {
+    pools: ['mirror', 'stripe-nvme'],
+  },
+};
+
 local media = (import 'stacks/media.jsonnet') + {
   _config+: {
     domain: domain,
@@ -87,6 +93,7 @@ local monitoring = (import 'stacks/monitoring.jsonnet') + {
 };
 
 site.render({
+  zfs: zfs,
   monitoring: monitoring,
   media: media,
 })
