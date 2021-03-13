@@ -92,8 +92,16 @@ local monitoring = (import 'stacks/monitoring.jsonnet') + {
   },
 };
 
+local home_automation = (import 'stacks/home-automation.jsonnet') + {
+  _config+: {
+    domain: domain,
+    node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
+  },
+};
+
 site.render({
   zfs: zfs,
   monitoring: monitoring,
   media: media,
+  home_automation: home_automation,
 })
