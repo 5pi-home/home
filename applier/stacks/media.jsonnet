@@ -7,12 +7,14 @@
   },
 
   plex: (import 'apps/plex/main.jsonnet').new({
-    host: 'plex.' + $._config.domain,
+    local host = 'plex.' + $._config.domain,
+    host: host,
     namespace: 'default',  // FIXME: Too lazy to move PVC right now.. $._config.namespace,
     storage_class: $._config.storage_class,
     media_path: $._config.media_path,
     env: $._config.plex_env + [
       { name: 'TZ', value: $._config.timezone },
+      { name: 'ADVERTISE_IP', value: 'http://' + host + ':32400/' },
     ],
   }),
 

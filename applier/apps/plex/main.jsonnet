@@ -9,6 +9,8 @@ local default_config = {
   image: 'plexinc/pms-docker:1.22.0.4163-d8c4875dd',
   storage_size: '5Gi',
   storage_class: 'default',
+  host_network: false,
+  hostname: 'plex',
 };
 
 local ports = {
@@ -40,7 +42,8 @@ local ports = {
           if 'protocol' in ports[name] then k.core.v1.containerPort.withProtocol(ports[name].protocol) else {}
           for name in std.objectFields(ports)
         ]) + k.core.v1.container.withEnv(config.env),
-      deployment+: k.apps.v1.deployment.spec.template.spec.withHostNetwork(true) +
+      deployment+: k.apps.v1.deployment.spec.template.spec.withHostNetwork(config.host_network) +
+                   k.apps.v1.deployment.spec.template.spec.withHostname(config.hostname) +
                    k.apps.v1.deployment.spec.strategy.withType('Recreate'),
       service+: k.core.v1.service.spec.withPortsMixin([
         k.core.v1.servicePort.newNamed(name, ports[name].port, ports[name].port) +
