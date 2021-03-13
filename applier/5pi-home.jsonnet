@@ -19,6 +19,9 @@ local media = (import 'stacks/media.jsonnet') + {
       server1_username: std.extVar('media_server1_username'),
       server1_password: std.extVar('media_server1_password'),
     },
+
+    timezone: 'Europe/Berlin',
+    plex_env: [{ name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') }],
   },
 };
 

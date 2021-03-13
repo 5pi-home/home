@@ -1,9 +1,21 @@
 {
   _config:: {
     domain: error 'Must define domain',
+    timezone: error 'Must define timezone',
     namespace: 'media',
+    plex_env: [],
   },
 
+  plex: (import 'apps/plex/main.jsonnet').new({
+    host: 'plex.' + $._config.domain,
+    namespace: 'default',  // FIXME: Too lazy to move PVC right now.. $._config.namespace,
+    storage_class: $._config.storage_class,
+    media_path: $._config.media_path,
+    env: $._config.plex_env + [
+      { name: 'TZ', value: $._config.timezone },
+      { name: 'HOSTNAME', value: 'plex' },
+    ],
+  }),
 
   nzbget: (import 'apps/nzbget/main.libsonnet') + {
     _config+:: {
