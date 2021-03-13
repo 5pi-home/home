@@ -9,7 +9,7 @@ local default_config = {
   image: 'plexinc/pms-docker:1.22.0.4163-d8c4875dd',
   storage_size: '5Gi',
   storage_class: 'default',
-  host_network: false,
+  host_network: true,
   hostname: 'plex',
 };
 
