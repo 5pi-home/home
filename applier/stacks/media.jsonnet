@@ -13,7 +13,6 @@
     media_path: $._config.media_path,
     env: $._config.plex_env + [
       { name: 'TZ', value: $._config.timezone },
-      { name: 'HOSTNAME', value: 'plex' },
     ],
   }),
 

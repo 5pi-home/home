@@ -6,7 +6,7 @@ local default_config = {
   namespace: 'default',
   host: error 'Must define host',
   media_path: error 'Must define media_path',
-  image: 'plexinc/pms-docker:1.20.5.3600-47c0d9038',
+  image: 'plexinc/pms-docker:1.22.0.4163-d8c4875dd',
   storage_size: '5Gi',
   storage_class: 'default',
 };
@@ -31,13 +31,17 @@ local ports = {
       32400,
       namespace=config.namespace
     ) +
-    app.withPVC(config.name, config.storage_size, '/data', config.storage_class) +
-    app.withVolumeMixin(k.core.v1.volume.fromHostPath('media', config.media_path), '/media') + {
-      container+: k.core.v1.container.withPortsMixin([
-        k.core.v1.containerPort.new(ports[name].port) +
-        if 'protocol' in ports[name] then k.core.v1.containerPort.withProtocol(ports[name].protocol) else {}
-        for name in std.objectFields(ports)
-      ]) + k.core.v1.container.withEnv(config.env),
+    app.withPVC(config.name, config.storage_size, '/config', config.storage_class) +
+    app.withVolumeMixin(k.core.v1.volume.fromHostPath('media', config.media_path), '/data') +
+    app.withVolumeMixin(k.core.v1.volume.fromEmptyDir('transcode'), '/transcode') + {
+      container+:
+        k.core.v1.container.withPortsMixin([
+          k.core.v1.containerPort.new(ports[name].port) +
+          if 'protocol' in ports[name] then k.core.v1.containerPort.withProtocol(ports[name].protocol) else {}
+          for name in std.objectFields(ports)
+        ]) + k.core.v1.container.withEnv(config.env),
+      deployment+: k.apps.v1.deployment.spec.template.spec.withHostNetwork(true) +
+                   k.apps.v1.deployment.spec.strategy.withType('Recreate'),
       service+: k.core.v1.service.spec.withPortsMixin([
         k.core.v1.servicePort.newNamed(name, ports[name].port, ports[name].port) +
         if 'protocol' in ports[name] then k.core.v1.servicePort.withProtocol(ports[name].protocol) else {}
