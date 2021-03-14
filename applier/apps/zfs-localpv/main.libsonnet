@@ -1,5 +1,5 @@
+local zfs = import 'contrib/zfs-localpv/main.json';
 local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
-local zfs = import 'zfs-operator.json';
 
 local version = '1.4.0';
 local driver_image = 'openebs/zfs-driver:' + version;
