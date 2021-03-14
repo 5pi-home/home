@@ -1,4 +1,5 @@
 vendor/
 *.swp
-build/
+build/*
+!build/5pi-home.jsonnet.test-args
 scratch/

@@ -1,0 +1,14 @@
+"apiVersion": "extensions/v1beta1"
+"kind": "Ingress"
+"metadata":
+  "name": "prometheus"
+  "namespace": "monitoring"
+"spec":
+  "rules":
+  - "host": "prometheus.d.42o.de"
+    "http":
+      "paths":
+      - "backend":
+          "serviceName": "prometheus"
+          "servicePort": 9090
+        "path": "/"

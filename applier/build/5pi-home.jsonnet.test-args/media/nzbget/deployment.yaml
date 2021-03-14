@@ -1,0 +1,47 @@
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata":
+  "labels":
+    "app": "nzbget"
+  "name": "nzbget"
+  "namespace": "media"
+"spec":
+  "replicas": 1
+  "selector":
+    "matchLabels":
+      "app": "nzbget"
+  "strategy":
+    "type": "Recreate"
+  "template":
+    "metadata":
+      "annotations":
+        "nzbget-config-hash": "dcba1a460e9663d5b3f002bd9c22997c"
+      "labels":
+        "app": "nzbget"
+    "spec":
+      "containers":
+      - "args":
+        - "-s"
+        - "--configfile=/etc/nzbget/nzbget.conf"
+        "image": "fish/nzbget:v21.0"
+        "name": "nzbget"
+        "volumeMounts":
+        - "mountPath": "/nzbget/downloads"
+          "name": "nzbget"
+        - "mountPath": "/etc/nzbget"
+          "name": "nzbget-config"
+        - "mountPath": "/media"
+          "name": "media"
+      "nodeSelector": {}
+      "securityContext":
+        "runAsUser": 1000
+      "volumes":
+      - "name": "nzbget"
+        "persistentVolumeClaim":
+          "claimName": "nzbget"
+      - "configMap":
+          "name": "nzbget-config"
+        "name": "nzbget-config"
+      - "hostPath":
+          "path": "/pool-mirror/media"
+        "name": "media"

@@ -1,0 +1,30 @@
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata":
+  "name": "radarr"
+  "namespace": "media"
+"spec":
+  "replicas": 1
+  "selector":
+    "matchLabels":
+      "name": "radarr"
+  "template":
+    "metadata":
+      "labels":
+        "name": "radarr"
+    "spec":
+      "containers":
+      - "image": "fish/radarr:0.2.0.1293-0"
+        "name": "radarr"
+        "volumeMounts":
+        - "mountPath": "/data"
+          "name": "radarr"
+        - "mountPath": "/media"
+          "name": "media"
+      "volumes":
+      - "name": "radarr"
+        "persistentVolumeClaim":
+          "claimName": "radarr"
+      - "hostPath":
+          "path": "/pool-mirror/media"
+        "name": "media"

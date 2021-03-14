@@ -1,0 +1,127 @@
+"apiVersion": "apps/v1"
+"kind": "DaemonSet"
+"metadata":
+  "labels":
+    "openebs.io/component-name": "openebs-zfs-node"
+    "openebs.io/version": "ci"
+  "name": "openebs-zfs-node"
+  "namespace": "kube-system"
+"spec":
+  "selector":
+    "matchLabels":
+      "app": "openebs-zfs-node"
+  "template":
+    "metadata":
+      "labels":
+        "app": "openebs-zfs-node"
+        "openebs.io/component-name": "openebs-zfs-node"
+        "openebs.io/version": "ci"
+        "role": "openebs-zfs"
+    "spec":
+      "containers":
+      - "args":
+        - "--v=5"
+        - "--csi-address=$(ADDRESS)"
+        - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
+        "env":
+        - "name": "ADDRESS"
+          "value": "/plugin/csi.sock"
+        - "name": "DRIVER_REG_SOCK_PATH"
+          "value": "/var/lib/kubelet/plugins/zfs-localpv/csi.sock"
+        - "name": "KUBE_NODE_NAME"
+          "valueFrom":
+            "fieldRef":
+              "fieldPath": "spec.nodeName"
+        - "name": "NODE_DRIVER"
+          "value": "openebs-zfs"
+        "image": "k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.1.0"
+        "imagePullPolicy": "IfNotPresent"
+        "lifecycle":
+          "preStop":
+            "exec":
+              "command":
+              - "/bin/sh"
+              - "-c"
+              - "rm -rf /registration/zfs-localpv /registration/zfs-localpv-reg.sock"
+        "name": "csi-node-driver-registrar"
+        "volumeMounts":
+        - "mountPath": "/plugin"
+          "name": "plugin-dir"
+        - "mountPath": "/registration"
+          "name": "registration-dir"
+      - "args":
+        - "--nodeid=$(OPENEBS_NODE_ID)"
+        - "--endpoint=$(OPENEBS_CSI_ENDPOINT)"
+        - "--plugin=$(OPENEBS_NODE_DRIVER)"
+        "env":
+        - "name": "OPENEBS_NODE_ID"
+          "valueFrom":
+            "fieldRef":
+              "fieldPath": "spec.nodeName"
+        - "name": "OPENEBS_CSI_ENDPOINT"
+          "value": "unix:///plugin/csi.sock"
+        - "name": "OPENEBS_NODE_DRIVER"
+          "value": "agent"
+        - "name": "OPENEBS_NAMESPACE"
+          "value": "openebs"
+        "image": "openebs/zfs-driver:1.4.0"
+        "imagePullPolicy": "IfNotPresent"
+        "name": "openebs-zfs-plugin"
+        "securityContext":
+          "allowPrivilegeEscalation": true
+          "privileged": true
+        "volumeMounts":
+        - "mountPath": "/plugin"
+          "name": "plugin-dir"
+        - "mountPath": "/dev"
+          "name": "device-dir"
+        - "mountPath": "/home/keys"
+          "name": "encr-keys"
+        - "mountPath": "/sbin/zfs"
+          "name": "chroot-zfs"
+          "subPath": "zfs"
+        - "mountPath": "/host"
+          "mountPropagation": "HostToContainer"
+          "name": "host-root"
+          "readOnly": true
+        - "mountPath": "/var/lib/kubelet/"
+          "mountPropagation": "Bidirectional"
+          "name": "pods-mount-dir"
+      "hostNetwork": true
+      "nodeSelector":
+        "beta.kubernetes.io/arch": "amd64"
+      "priorityClassName": "system-node-critical"
+      "serviceAccount": "openebs-zfs-node-sa"
+      "volumes":
+      - "hostPath":
+          "path": "/dev"
+          "type": "Directory"
+        "name": "device-dir"
+      - "hostPath":
+          "path": "/home/keys"
+          "type": "DirectoryOrCreate"
+        "name": "encr-keys"
+      - "configMap":
+          "defaultMode": 365
+          "name": "openebs-zfspv-bin"
+        "name": "chroot-zfs"
+      - "hostPath":
+          "path": "/"
+          "type": "Directory"
+        "name": "host-root"
+      - "hostPath":
+          "path": "/var/lib/kubelet/plugins_registry/"
+          "type": "DirectoryOrCreate"
+        "name": "registration-dir"
+      - "hostPath":
+          "path": "/var/lib/kubelet/plugins/zfs-localpv/"
+          "type": "DirectoryOrCreate"
+        "name": "plugin-dir"
+      - "hostPath":
+          "path": "/var/lib/kubelet/"
+          "type": "Directory"
+        "name": "pods-mount-dir"
+  "updateStrategy":
+    "rollingUpdate":
+      "maxUnavailable": "100%"
+    "type": "RollingUpdate"

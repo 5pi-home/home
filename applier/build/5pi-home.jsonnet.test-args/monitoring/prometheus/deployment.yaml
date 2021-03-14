@@ -1,0 +1,66 @@
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata":
+  "labels":
+    "app": "prometheus"
+  "name": "prometheus"
+  "namespace": "monitoring"
+"spec":
+  "replicas": 1
+  "selector":
+    "matchLabels":
+      "app": "prometheus"
+  "template":
+    "metadata":
+      "labels":
+        "app": "prometheus"
+    "spec":
+      "containers":
+      - "args":
+        - "--config.file=/etc/prometheus/prometheus.yaml"
+        - "--log.level=info"
+        - "--storage.tsdb.path=/prometheus"
+        - "--web.enable-lifecycle"
+        - "--web.enable-admin-api"
+        - "--web.external-url=http://prometheus.d.42o.de"
+        "image": "prom/prometheus:v2.15.2"
+        "name": "prometheus"
+        "volumeMounts":
+        - "mountPath": "/prometheus"
+          "name": "data"
+          "readOnly": false
+        - "mountPath": "/etc/prometheus"
+          "name": "config"
+          "readOnly": false
+        - "mountPath": "/etc/prometheus/pluto-kubelet-ca"
+          "name": "kubelet-pluto-ca"
+        - "mountPath": "/etc/prometheus/pluto-kubelet"
+          "name": "kubelet-pluto"
+      - "args":
+        - "-volume-dir"
+        - "/volume"
+        - "-webhook-url"
+        - "http://localhost:9090/-/reload"
+        "image": "jimmidyson/configmap-reload:v0.3.0"
+        "name": "reloader"
+        "volumeMounts":
+        - "mountPath": "/volume"
+          "name": "config"
+          "readOnly": false
+      "securityContext":
+        "fsGroup": 1000
+        "runAsUser": 1000
+      "serviceAccountName": "prometheus"
+      "volumes":
+      - "name": "data"
+        "persistentVolumeClaim":
+          "claimName": "prometheus"
+      - "configMap":
+          "name": "prometheus"
+        "name": "config"
+      - "configMap":
+          "name": "kubelet-pluto-ca"
+        "name": "kubelet-pluto-ca"
+      - "name": "kubelet-pluto"
+        "secret":
+          "secretName": "kubelet-pluto"

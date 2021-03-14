@@ -1,0 +1,17 @@
+"apiVersion": "networking.k8s.io/v1"
+"kind": "Ingress"
+"metadata":
+  "name": "plex"
+  "namespace": "default"
+"spec":
+  "rules":
+  - "host": "plex.d.42o.de"
+    "http":
+      "paths":
+      - "backend":
+          "service":
+            "name": "plex"
+            "port":
+              "number": 32400
+        "path": "/"
+        "pathType": "Prefix"
