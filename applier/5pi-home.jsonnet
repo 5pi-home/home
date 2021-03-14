@@ -102,8 +102,25 @@ local home_automation = (import 'stacks/home-automation.jsonnet') + {
   },
 };
 
+local ingress_nginx = (import 'apps/ingress-nginx/main.jsonnet').new({
+  host_mode: true,
+  node_selector: { 'kubernetes.io/hostname': 'openwrt' },
+});
+
 site.render({
   zfs: zfs,
+  ingress: {
+    ingress_nginx: ingress_nginx {
+      // FIXME: We need to run as root since capabilities seem not to work on my openwrt image
+      'ingress-nginx-controller-deployment'+: k.apps.v1.deployment.spec.template.spec.withContainers(
+        [
+          ingress_nginx['ingress-nginx-controller-deployment'].spec.template.spec.containers[0] +
+          k.core.v1.container.securityContext.withRunAsUser(0) +
+          k.core.v1.container.securityContext.capabilities.withDrop([]),
+        ]
+      ),
+    },
+  },
   monitoring: monitoring,
   media: media,
   home_automation: home_automation,

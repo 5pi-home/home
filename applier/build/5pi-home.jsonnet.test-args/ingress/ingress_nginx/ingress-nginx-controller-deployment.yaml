@@ -18,6 +18,8 @@
       "app.kubernetes.io/component": "controller"
       "app.kubernetes.io/instance": "ingress-nginx"
       "app.kubernetes.io/name": "ingress-nginx"
+  "strategy":
+    "type": "Recreate"
   "template":
     "metadata":
       "labels":
@@ -94,13 +96,15 @@
             - "NET_BIND_SERVICE"
             "drop":
             - "ALL"
-          "runAsUser": 101
+          "runAsUser": 0
         "volumeMounts":
         - "mountPath": "/usr/local/certificates/"
           "name": "webhook-cert"
           "readOnly": true
       "dnsPolicy": "ClusterFirst"
+      "hostNetwork": true
       "nodeSelector":
+        "kubernetes.io/hostname": "openwrt"
         "kubernetes.io/os": "linux"
       "serviceAccountName": "ingress-nginx"
       "terminationGracePeriodSeconds": 300
