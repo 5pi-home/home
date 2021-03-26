@@ -99,6 +99,7 @@ local home_automation = (import 'stacks/home-automation.jsonnet') + {
   _config+: {
     domain: domain,
     node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
+    mqtt_node_selector: { 'kubernetes.io/hostname': 'openwrt' },
   },
 };
 
