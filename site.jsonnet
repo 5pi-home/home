@@ -1,15 +1,15 @@
 local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
 
 local domain = 'd.42o.de';
-local site = (import 'lib/site.jsonnet');
+local fpl = (import 'github.com/5pi/jsonnet-libs/main.libsonnet');
 
-local zfs = (import 'stacks/zfs.jsonnet') + {
+local zfs = fpl.stacks.zfs + {
   _config+: {
     pools: ['mirror', 'stripe-nvme'],
   },
 };
 
-local media = (import 'stacks/media.jsonnet') + {
+local media = fpl.stacks.media + {
   _config+: {
     domain: domain,
     storage_class: 'zfs-stripe-nvme',
@@ -25,7 +25,7 @@ local media = (import 'stacks/media.jsonnet') + {
   },
 };
 
-local monitoring = (import 'stacks/monitoring.jsonnet') + {
+local monitoring = fpl.stacks.monitoring + {
   _config+:: {
     prometheus+: {
       external_domain: 'prometheus.' + domain,
@@ -95,7 +95,7 @@ local monitoring = (import 'stacks/monitoring.jsonnet') + {
   },
 };
 
-local home_automation = (import 'stacks/home-automation.jsonnet') + {
+local home_automation = fpl.stacks['home-automation'] + {
   _config+: {
     domain: domain,
     node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
@@ -103,12 +103,12 @@ local home_automation = (import 'stacks/home-automation.jsonnet') + {
   },
 };
 
-local ingress_nginx = (import 'apps/ingress-nginx/main.jsonnet').new({
+local ingress_nginx = fpl.apps['ingress-nginx'].new({
   host_mode: true,
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
-site.render({
+fpl.lib.site.render({
   zfs: zfs,
   ingress: {
     ingress_nginx: ingress_nginx {

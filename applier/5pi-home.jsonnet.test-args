@@ -1,3 +1,0 @@
---ext-str media_server1_username="foo"
---ext-str media_server1_password="bar"
---ext-str media_plex_claim_token="baz"

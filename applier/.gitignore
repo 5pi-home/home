@@ -1,5 +1,0 @@
-vendor/
-*.swp
-build/*
-!build/5pi-home.jsonnet.test-args
-scratch/

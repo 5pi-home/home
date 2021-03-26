@@ -8,4 +8,4 @@ jsonnet=${JSONNET:-jsonnet}
 opts=""
 [[ -s "$args" ]] && opts=($(cat "$args"))
 
-eval --  "$jsonnet" "${opts[@]}" -J vendor/ -J . 5pi-home.jsonnet -S -c -m "build/$out"
+eval --  "$jsonnet" "${opts[@]}" -J vendor/ -J . "$site" -S -c -m "build/$out"
