@@ -1,4 +1,4 @@
-SITE    ?= 5pi-home.jsonnet
+SITE    ?= site.jsonnet
 JSONNET ?="java -jar ../sjsonnet.jar"
 
 .PHONY: all
