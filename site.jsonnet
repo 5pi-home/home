@@ -30,6 +30,7 @@ local monitoring = fpl.stacks.monitoring {
     prometheus+: {
       host: 'prometheus.' + domain,
       storage_class: 'zfs-stripe-nvme',
+      storage_size: '10G',
       _config+: {
         prometheus_config+: {
           scrape_configs+: [{
