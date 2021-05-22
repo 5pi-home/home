@@ -5,14 +5,14 @@ local fpl = (import 'github.com/5pi/jsonnet-libs/main.libsonnet');
 
 local zfs = fpl.stacks.zfs {
   _config+: {
-    pools: ['mirror', 'stripe-nvme'],
+    pools: ['mirror', 'stripe-ssd'],
   },
 };
 
 local media = fpl.stacks.media {
   _config+: {
     domain: domain,
-    storage_class: 'zfs-stripe-nvme',
+    storage_class: 'zfs-stripe-ssd',
     media_path: '/pool-mirror/media',
 
     usenet: {
@@ -29,7 +29,7 @@ local monitoring = fpl.stacks.monitoring {
   _config+:: {
     prometheus+: {
       host: 'prometheus.' + domain,
-      storage_class: 'zfs-stripe-nvme',
+      storage_class: 'zfs-stripe-ssd',
       storage_size: '10G',
       _config+: {
         prometheus_config+: {
