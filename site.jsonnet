@@ -31,45 +31,43 @@ local monitoring = fpl.stacks.monitoring {
       host: 'prometheus.' + domain,
       storage_class: 'zfs-stripe-ssd',
       storage_size: '10G',
-      _config+: {
-        prometheus_config+: {
-          scrape_configs+: [{
-            job_name: 'pluto-node-exporter',
-            static_configs: [{
-              targets: ['78.47.234.52:9100'],
-            }],
-          }, {
-            job_name: 'pluto-kubelet',
-            scheme: 'https',
-            tls_config: {
-              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-              insecure_skip_verify: true,
-            },
-            static_configs: [{
-              targets: [
-                '78.47.234.52:10250',
-                '78.47.234.52:10250',
-              ],
-            }],
-          }, {
-            job_name: 'pluto-cadvisor',
-            scheme: 'https',
-            tls_config: {
-              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-              insecure_skip_verify: true,
-            },
-            metrics_path: '/metrics/cadvisor',
-            static_configs: [{
-              targets: [
-                '78.47.234.52:10250',
-              ],
-            }],
+      prometheus_config+: {
+        scrape_configs+: [{
+          job_name: 'pluto-node-exporter',
+          static_configs: [{
+            targets: ['78.47.234.52:9100'],
           }],
-        },
+        }, {
+          job_name: 'pluto-kubelet',
+          scheme: 'https',
+          tls_config: {
+            ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
+            cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
+            key_file: '/etc/prometheus/pluto-kubelet/tls.key',
+            insecure_skip_verify: true,
+          },
+          static_configs: [{
+            targets: [
+              '78.47.234.52:10250',
+              '78.47.234.52:10250',
+            ],
+          }],
+        }, {
+          job_name: 'pluto-cadvisor',
+          scheme: 'https',
+          tls_config: {
+            ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
+            cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
+            key_file: '/etc/prometheus/pluto-kubelet/tls.key',
+            insecure_skip_verify: true,
+          },
+          metrics_path: '/metrics/cadvisor',
+          static_configs: [{
+            targets: [
+              '78.47.234.52:10250',
+            ],
+          }],
+        }],
       },
     },
     grafana+: {
@@ -124,6 +122,13 @@ fpl.lib.site.render({
         ]
       ),
     },
+  },
+  jupyter: {
+    jupyter: (import 'github.com/5pi/jsonnet-libs/apps/jupyterlab/main.libsonnet').new({
+      host: 'jupyter.' + domain,
+      node_selector: { 'kubernetes.io/hostname': 'filer' },
+      data_path: '/pool-mirror/jupyter',
+    }),
   },
   monitoring: monitoring,
   media: media,
