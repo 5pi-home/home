@@ -32,42 +32,52 @@ local monitoring = fpl.stacks.monitoring {
       storage_class: 'zfs-stripe-ssd',
       storage_size: '10G',
       prometheus_config+: {
-        scrape_configs+: [{
-          job_name: 'pluto-node-exporter',
-          static_configs: [{
-            targets: ['78.47.234.52:9100'],
-          }],
-        }, {
-          job_name: 'pluto-kubelet',
-          scheme: 'https',
-          tls_config: {
-            ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-            cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-            key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-            insecure_skip_verify: true,
+        scrape_configs+: [
+          {
+            job_name: 'pluto-node-exporter',
+            static_configs: [{
+              targets: ['78.47.234.52:9100'],
+            }],
           },
-          static_configs: [{
-            targets: [
-              '78.47.234.52:10250',
-              '78.47.234.52:10250',
-            ],
-          }],
-        }, {
-          job_name: 'pluto-cadvisor',
-          scheme: 'https',
-          tls_config: {
-            ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-            cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-            key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-            insecure_skip_verify: true,
+          {
+            job_name: 'pluto-kubelet',
+            scheme: 'https',
+            tls_config: {
+              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
+              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
+              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
+              insecure_skip_verify: true,
+            },
+            static_configs: [{
+              targets: [
+                '78.47.234.52:10250',
+                '78.47.234.52:10250',
+              ],
+            }],
           },
-          metrics_path: '/metrics/cadvisor',
-          static_configs: [{
-            targets: [
-              '78.47.234.52:10250',
-            ],
-          }],
-        }],
+          {
+            job_name: 'pluto-cadvisor',
+            scheme: 'https',
+            tls_config: {
+              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
+              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
+              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
+              insecure_skip_verify: true,
+            },
+            metrics_path: '/metrics/cadvisor',
+            static_configs: [{
+              targets: [
+                '78.47.234.52:10250',
+              ],
+            }],
+          },
+          {
+            job_name: 'mouldy',
+            static_configs: [{
+              targets: ['n-office', 'n-bedroom', 'n-living'],
+            }],
+          },
+        ],
       },
 
     },
