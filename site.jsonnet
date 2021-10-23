@@ -69,6 +69,10 @@ local monitoring = fpl.stacks.monitoring {
           }],
         }],
       },
+
+    },
+    node_exporter+: {
+      args: ['--collector.ethtool'],
     },
     grafana+: {
       external_domain: 'grafana.' + domain,
