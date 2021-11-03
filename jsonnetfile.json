@@ -49,6 +49,15 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/kubernetes/kube-state-metrics.git",
+          "subdir": "jsonnet/kube-state-metrics"
+        }
+      },
+      "version": "master"
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/prometheus/node_exporter.git",
           "subdir": "docs/node-mixin"
         }
