@@ -9,6 +9,9 @@ local fplibs = {
 
 local fpl = if std.extVar('fpl_local') == 'true' then fplibs.dev else fplibs.release;
 
+
+local cert_manager = (import '../jsonnet-libs/apps/cert-manager/main.jsonnet');
+local tls_issuer = 'letsencrypt-production';
 local zfs = fpl.stacks.zfs {
   _config+: {
     pools: ['mirror', 'stripe-ssd'],
@@ -122,6 +125,7 @@ local home_automation = fpl.stacks['home-automation'] {
     node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
     mqtt_node_selector: { 'kubernetes.io/hostname': 'openwrt' },
   },
+  home_assistant+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
@@ -199,6 +203,20 @@ fpl.lib.site.render({
       node_selector: { 'kubernetes.io/hostname': 'filer' },
       data_path: '/pool-mirror/jupyter',
     }),
+  },
+
+  'cert-manager': {
+    'cert-manager': cert_manager.new({
+      email: 'acme@5pi.de',
+      args: [
+        '--default-issuer-name=letsencrypt-staging',
+        '--default-issuer-kind=ClusterIssuer',
+        '--default-issuer-group=cert-manager.io',
+      ],
+    }) + {
+      'cluster-issuer-letsencrypt-staging': cert_manager.acme_issuer('acme@5pi.de', 'nginx'),
+      'cluster-issuer-letsencrypt-production': cert_manager.acme_issuer('acme@5pi.de', 'nginx', env='production'),
+    },
   },
   monitoring: monitoring,
   media: media,
