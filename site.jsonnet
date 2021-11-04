@@ -1,7 +1,13 @@
 local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
 
 local domain = 'd.42o.de';
-local fpl = (import 'github.com/5pi/jsonnet-libs/main.libsonnet');
+
+local fplibs = {
+  release: import 'github.com/5pi/jsonnet-libs/main.libsonnet',
+  dev: import '../jsonnet-libs/main.libsonnet',
+};
+
+local fpl = if std.extVar('fpl_local') == 'true' then fplibs.dev else fplibs.release;
 
 local zfs = fpl.stacks.zfs {
   _config+: {
