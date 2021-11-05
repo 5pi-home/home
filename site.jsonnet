@@ -32,6 +32,10 @@ local media = fpl.stacks.media {
     timezone: 'Europe/Berlin',
     plex_env: [{ name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') }],
   },
+  nzbget+: cert_manager.withCertManagerTLS(tls_issuer),
+  radarr+: cert_manager.withCertManagerTLS(tls_issuer),
+  sonarr+: cert_manager.withCertManagerTLS(tls_issuer),
+  plex+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
 local monitoring = fpl.stacks.monitoring {
@@ -116,7 +120,8 @@ local monitoring = fpl.stacks.monitoring {
         },
       },
     },
-  },
+  } + cert_manager.withCertManagerTLS(tls_issuer),
+  // grafana+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
 local home_automation = fpl.stacks['home-automation'] {
@@ -126,6 +131,7 @@ local home_automation = fpl.stacks['home-automation'] {
     mqtt_node_selector: { 'kubernetes.io/hostname': 'openwrt' },
   },
   home_assistant+: cert_manager.withCertManagerTLS(tls_issuer),
+  zwave2mqtt+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
@@ -202,7 +208,7 @@ fpl.lib.site.render({
       host: 'jupyter.' + domain,
       node_selector: { 'kubernetes.io/hostname': 'filer' },
       data_path: '/pool-mirror/jupyter',
-    }),
+    }) + cert_manager.withCertManagerTLS(tls_issuer),
   },
 
   'cert-manager': {
