@@ -100,6 +100,24 @@ local monitoring = fpl.stacks.monitoring {
     grafana+: {
       external_domain: 'grafana.' + domain,
     },
+    grafana_config: {
+      sections: {
+        server: {
+          root_url: 'https://' + $._config.grafana.external_domain,
+        },
+        'auth.github': {
+          enabled: true,
+          allow_sign_up: true,
+          client_id: '7fb952e1283dff23be79',
+          client_secret: std.extVar('monitoring_grafana_oauth_client_secret'),
+          scopes: 'user:email,read:org',
+          auth_url: 'https://github.com/login/oauth/authorize',
+          token_url: 'https://github.com/login/oauth/access_token',
+          api_url: 'https://api.github.com/user',
+          allowed_organizations: '5pi-home',
+        },
+      },
+    },
   },
   prometheus+: {
     container+: {
@@ -121,6 +139,12 @@ local monitoring = fpl.stacks.monitoring {
       },
     },
   } + cert_manager.withCertManagerTLS(tls_issuer),
+  grafana+: {
+    ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+      'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+    }) + cert_manager.ingressCertManagerTLSMixin($._config.grafana.external_domain, tls_issuer),
+  },
+
   // grafana+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
@@ -139,9 +163,6 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
-local auth_host = 'auth-internal.' + domain;
-local auth_port = 8080;
-
 fpl.lib.site.render({
   zfs: zfs,
   ingress: {
@@ -154,54 +175,30 @@ fpl.lib.site.render({
           k.core.v1.container.securityContext.capabilities.withDrop([]),
         ]
       ),
-      'ingress-nginx-controller-dummy-server-service': k.core.v1.service.new(
-        'auth-internal',
-        {
-          'app.kubernetes.io/component': 'controller',
-          'app.kubernetes.io/instance': 'ingress-nginx',
-          'app.kubernetes.io/name': 'ingress-nginx',
-        },
-        k.core.v1.servicePort.new(auth_port, auth_port),
-      ) + k.core.v1.service.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
-      'auth-ingress': k.networking.v1.ingress.new('auth-internal') +
-                      k.networking.v1.ingress.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace) +
-                      k.networking.v1.ingress.metadata.withAnnotations({
-                        'nginx.ingress.kubernetes.io/auth-type': 'basic',
-                        'nginx.ingress.kubernetes.io/auth-secret': 'basic-auth',
-                        'nginx.ingress.kubernetes.io/auth-realm': 'Authentication Required - auth',
-                        'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
-                        'nginx.ingress.kubernetes.io/server-snippet': |||
-                          if ($remote_addr ~* "192.168.1.") {
-                            return 200; // FIXME DOES NOT WORK
-                            break;
-                          }
-                        |||,
-                      }) +
-                      k.networking.v1.ingress.spec.withRules(
-                        k.networking.v1.ingressRule.withHost(auth_host) +
-                        k.networking.v1.ingressRule.http.withPaths(
-                          k.networking.v1.httpIngressPath.withPath('/') +
-                          k.networking.v1.httpIngressPath.withPathType('Prefix') +
-                          k.networking.v1.httpIngressPath.backend.service.withName('auth-internal') +
-                          k.networking.v1.httpIngressPath.backend.service.port.withNumber(8080)
-                        )
-                      ),
       'ingress-nginx-controller-configmap'+: {
         data: {
-          'global-auth-url': 'http://' + auth_host,
-          //'whitelist-source-range': '192.168.1.0/24',
+          'global-auth-url': 'https://oauth2-proxy.' + domain + '/oauth2/auth',
+          'global-auth-signin': 'https://oauth2-proxy.' + domain + '/start?rd=$scheme://$host$request_uri',
           'main-snippet': 'user root;',  // Required for nginx to be able to read passwd files written by ingress controller
-          'http-snippet': |||
-            server {
-              listen %d default_server;
-              location / {
-                return 200 OK;
-              }
-            }
-          ||| % auth_port,
         },
       },
     },
+    oauth2_proxy: (import '../jsonnet-libs/apps/oauth2-proxy/main.libsonnet').new({
+      namespace: 'ingress-nginx',
+      client_id: 'd57fc7ff4afeeb24fc66',
+      client_secret: std.extVar('oauth2_proxy_client_secret'),
+      cookie_secret: std.extVar('oauth2_proxy_cookie_secret'),
+      host: 'oauth2-proxy.' + domain,
+      node_selector: { 'kubernetes.io/arch': 'amd64' },
+      args: [
+        '--provider=github',
+        '--github-org=5pi-home',
+        '--email-domain=*',
+        '--upstream=file:///dev/null',
+        '--cookie-domain=.' + domain,
+        '--whitelist-domain=.' + domain,
+      ],
+    }) + cert_manager.withCertManagerTLS(tls_issuer),
   },
   jupyter: {
     jupyter: (import 'github.com/5pi/jsonnet-libs/apps/jupyterlab/main.libsonnet').new({

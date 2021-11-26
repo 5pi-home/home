@@ -1,4 +1,7 @@
 --ext-str media_server1_username=$(pass home/usenet/ewaka/username)
 --ext-str media_server1_password=$(pass home/usenet/ewaka/password)
 --ext-str media_plex_claim_token=$(pass home/plex/claim_token)
+--ext-str monitoring_grafana_oauth_client_secret=$(pass home/grafana/oauth_client_secret)
+--ext-str oauth2_proxy_cookie_secret=$(pass home/oauth2_proxy/cookie_secret)
+--ext-str oauth2_proxy_client_secret=$(pass home/oauth2_proxy/client_secret)
 --ext-str fpl_local=true
