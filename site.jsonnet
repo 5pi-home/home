@@ -9,7 +9,6 @@ local fplibs = {
 
 local fpl = if std.extVar('fpl_local') == 'true' then fplibs.dev else fplibs.release;
 
-
 local cert_manager = (import '../jsonnet-libs/apps/cert-manager/main.jsonnet');
 local tls_issuer = 'letsencrypt-production';
 local zfs = fpl.stacks.zfs {
@@ -163,18 +162,46 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
+local minecraft =
+  (import 'github.com/discordianfish/minecraft/lib/minecraft/kubernetes.jsonnet') +
+  {
+    _config+: {
+      image: 'docker.io/fish/minecraft:50353b060d6674a179c2ddef2fab4a0fdcfb28a1',
+      single_node: false,
+      memory_limit: 2 * 1024 + 'M',
+    },
+    // container:: super,
+    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
+  } +
+  fpl.lib.app.withPVC('minecraft', '30G', '/data', 'zfs-stripe-ssd') +
+  fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
+  cert_manager.withCertManagerTLS(tls_issuer) + {
+    ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+      'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+    }),
+    service+: k.core.v1.service.spec.withPortsMixin([
+      k.core.v1.servicePort.newNamed('game', 25565, 25565),
+      k.core.v1.servicePort.newNamed('game-udp', 19132, 19132) +
+      k.core.v1.servicePort.withProtocol('UDP'),
+    ]),
+  };
+
 fpl.lib.site.render({
   zfs: zfs,
   ingress: {
     ingress_nginx: ingress_nginx {
+      local container = ingress_nginx['ingress-nginx-controller-deployment'].spec.template.spec.containers[0],
       // FIXME: We need to run as root since capabilities seem not to work on my openwrt image
       'ingress-nginx-controller-deployment'+: k.apps.v1.deployment.spec.template.spec.withContainers(
         [
-          ingress_nginx['ingress-nginx-controller-deployment'].spec.template.spec.containers[0] +
+          container +
           k.core.v1.container.securityContext.withRunAsUser(0) +
-          k.core.v1.container.securityContext.capabilities.withDrop([]),
+          k.core.v1.container.securityContext.capabilities.withDrop([]) +
+          k.core.v1.container.withArgs(container.args + ['--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services', '--udp-services-configmap=$(POD_NAMESPACE)/udp-services']),
         ]
       ),
+      'tcp-services-configmap': k.core.v1.configMap.new('tcp-services', { '25565': 'minecraft/minecraft:25565' }) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
+      'udp-services-configmap': k.core.v1.configMap.new('udp-services', { '19132': 'minecraft/minecraft:19132' }) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
       'ingress-nginx-controller-configmap'+: {
         data: {
           'global-auth-url': 'https://oauth2-proxy.' + domain + '/oauth2/auth',
@@ -220,6 +247,9 @@ fpl.lib.site.render({
       'cluster-issuer-letsencrypt-staging': cert_manager.acme_issuer('acme@5pi.de', 'nginx'),
       'cluster-issuer-letsencrypt-production': cert_manager.acme_issuer('acme@5pi.de', 'nginx', env='production'),
     },
+  },
+  minecraft: {
+    minecraft: minecraft,
   },
   monitoring: monitoring,
   media: media,

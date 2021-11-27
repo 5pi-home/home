@@ -24,6 +24,16 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/discordianfish/minecraft.git",
+          "subdir": ""
+        }
+      },
+      "version": "7d6b137300ed5f40141fba23bcf70666bbef41ac",
+      "sum": "LjWPDIp1uyohjFAaHa77Dj5xiBu51zUBbrudsf7IPXU="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/grafana/grafonnet-lib.git",
           "subdir": "grafonnet"
         }
