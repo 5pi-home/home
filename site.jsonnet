@@ -193,6 +193,15 @@ local minecraft =
   };
 
 fpl.lib.site.render({
+  'kube-system': {
+    coredns: {
+      configmap:
+        k.core.v1.configMap.new(
+          'coredns', { Corefile: importstr 'files/Corefile' }
+        ) +
+        k.core.v1.configMap.metadata.withNamespace('kube-system'),
+    },
+  },
   zfs: zfs,
   ingress: {
     ingress_nginx: ingress_nginx {
