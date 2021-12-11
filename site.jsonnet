@@ -52,6 +52,12 @@ local monitoring = fpl.stacks.monitoring {
             }],
           },
           {
+            job_name: 'macbook-node-exporter',
+            static_configs: [{
+              targets: ['192.168.1.188:9100'],
+            }],
+          },
+          {
             job_name: 'pluto-kubelet',
             scheme: 'https',
             tls_config: {
