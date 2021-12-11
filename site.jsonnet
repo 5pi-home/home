@@ -201,6 +201,25 @@ fpl.lib.site.render({
         ) +
         k.core.v1.configMap.metadata.withNamespace('kube-system'),
     },
+    openwrt: {
+      _port:: 5080,
+      ingress_rule:: k.networking.v1.ingressRule.withHost('openwrt.' + domain) +
+                     k.networking.v1.ingressRule.http.withPaths([
+                       k.networking.v1.httpIngressPath.withPath('/') +
+                       k.networking.v1.httpIngressPath.withPathType('Prefix') +
+                       k.networking.v1.httpIngressPath.backend.service.withName(self.service.metadata.name) +
+                       k.networking.v1.httpIngressPath.backend.service.port.withNumber(self._port),
+                     ]),
+      ingress: k.networking.v1.ingress.new('openwrt') +
+               k.networking.v1.ingress.metadata.withNamespace(self.service.metadata.namespace) +
+               k.networking.v1.ingress.spec.withRules([self.ingress_rule]) +
+               cert_manager.ingressCertManagerTLSMixin(self.ingress_rule.host, tls_issuer),
+
+      service: k.core.v1.service.new('openwrt', {}, k.core.v1.servicePort.new(self._port, self._port)) +
+               k.core.v1.service.metadata.withNamespace('kube-system') +
+               k.core.v1.service.spec.withType('ExternalName') +
+               k.core.v1.service.spec.withExternalName('localhost'),
+    },
   },
   zfs: zfs,
   ingress: {
