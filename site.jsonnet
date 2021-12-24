@@ -220,6 +220,9 @@ fpl.lib.site.render({
                k.core.v1.service.spec.withType('ExternalName') +
                k.core.v1.service.spec.withExternalName('localhost'),
     },
+    'fuse-device-plugin': (import '../jsonnet-libs/apps/fuse-device-plugin/main.jsonnet').new({
+      node_selector: { 'kubernetes.io/arch': 'amd64' },
+    }),
   },
   zfs: zfs,
   ingress: {
