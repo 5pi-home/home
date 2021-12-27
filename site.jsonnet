@@ -223,6 +223,16 @@ fpl.lib.site.render({
     'fuse-device-plugin': (import '../jsonnet-libs/apps/fuse-device-plugin/main.jsonnet').new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
     }),
+    registry: (import '../jsonnet-libs/apps/registry/main.libsonnet').new({
+      host: 'registry.' + domain,
+      storage_class: 'zfs-stripe-ssd',
+      htpasswd: std.extVar('registry_htpasswd'),
+    }) + {
+      ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+        'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+        'nginx.ingress.kubernetes.io/proxy-body-size': '0',
+      }),
+    } + cert_manager.withCertManagerTLS(tls_issuer),
   },
   zfs: zfs,
   ingress: {
