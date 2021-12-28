@@ -192,7 +192,7 @@ local minecraft =
     ]),
   };
 
-fpl.lib.site.render({
+local manifests = fpl.lib.site.build({
   'kube-system': {
     coredns: {
       configmap:
@@ -301,4 +301,42 @@ fpl.lib.site.render({
   monitoring: monitoring,
   media: media,
   home_automation: home_automation,
+});
+
+local namespaces = std.uniq(std.sort([
+  manifest.metadata.namespace
+  for manifest in std.filter(
+    function(manifest) std.objectHas(manifest, 'metadata') && std.objectHas(manifest.metadata, 'namespace'),
+    std.objectValues(manifests)
+  )
+]));
+
+local dockerconfigjson = {
+  auths: {
+    ['registry.' + domain]: {
+      username: 'default',
+      password: std.extVar('registry_password'),
+      auth: std.base64('default:' + std.extVar('registry_password')),
+    },
+  },
+};
+
+local image_pull_secret = k.core.v1.secret.new('image-pull-secret', {
+  '.dockerconfigjson': std.base64(std.manifestJson(dockerconfigjson)),
+}) + k.core.v1.secret.withType('kubernetes.io/dockerconfigjson');
+
+fpl.lib.site.render(manifests + {
+  [namespace + '-namespace.yaml']: k.core.v1.namespace.new(namespace)
+  for namespace in namespaces
+} + {
+  [namespace + '-image-pull-secrets.yaml']:
+    image_pull_secret +
+    k.core.v1.secret.metadata.withNamespace(namespace)
+  for namespace in namespaces
+} + {
+  [namespace + '-default-serviceaccount.yaml']:
+    k.core.v1.serviceAccount.new('default') +
+    k.core.v1.serviceAccount.metadata.withNamespace(namespace) +
+    k.core.v1.serviceAccount.withImagePullSecrets({ name: image_pull_secret.metadata.name })
+  for namespace in namespaces
 })

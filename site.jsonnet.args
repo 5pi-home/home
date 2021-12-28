@@ -4,4 +4,6 @@
 --ext-str monitoring_grafana_oauth_client_secret=$(pass home/grafana/oauth_client_secret)
 --ext-str oauth2_proxy_cookie_secret=$(pass home/oauth2_proxy/cookie_secret)
 --ext-str oauth2_proxy_client_secret=$(pass home/oauth2_proxy/client_secret)
+--ext-str registry_htpasswd=$(htpasswd -nbB default $(pass home/image-registry/default))
+--ext-str registry_password=$(pass home/image-registry/default)
 --ext-str fpl_local=true
