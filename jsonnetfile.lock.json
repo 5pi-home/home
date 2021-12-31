@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "97c216d6ca6b458d4b6de5ed8424f86a267ea148",
-      "sum": "t172UNeXVHzA/INy2Yf2BGh1QW0lrSgXbQguVvl3ugk="
+      "version": "f926ac9668341a222eb83e56c6fb29cbfd04a061",
+      "sum": "Fr7G6zlnLst9C5qrLzxiFZ6A8y7hYorvdw4F5MvXb9A="
     },
     {
       "source": {
@@ -18,8 +18,8 @@
           "subdir": "grafana"
         }
       },
-      "version": "8ea4e7bc04b1bf5e9bd99918ca28c6271b42be0e",
-      "sum": "muenICtKXABk6MZZHCZD2wCbmtiE96GwWRMGa1Rg+wA="
+      "version": "c3b14b24b83cfe9abf1064649d19e2d679f033fb",
+      "sum": "YrE4DNQsWgYWs6h0j/FjQETt8xDXdYdsslb1WK7xQEk="
     },
     {
       "source": {
@@ -38,8 +38,8 @@
           "subdir": "grafonnet"
         }
       },
-      "version": "55cf4ee53ced2b6d3ce96ecce9fb813b4465be98",
-      "sum": "4/sUV0Kk+o8I+wlYxL9R6EPhL/NiLfYHk+NXlU64RUk="
+      "version": "3626fc4dc2326931c530861ac5bebe39444f6cbf",
+      "sum": "gF8foHByYcB25jcUOBqP6jxk0OPifQMjPvKY0HaCk6w="
     },
     {
       "source": {
@@ -48,8 +48,8 @@
           "subdir": ""
         }
       },
-      "version": "970b0dd2fc5b896406eba258cad78b7e0b0f18bf",
-      "sum": "NX4f1WuIdJiy3oT2Ii/pofFXVK6+wDU0TqyLctgrKHM="
+      "version": "264a5c2078c5930af57fe2d107eff83ab63553af",
+      "sum": "N+cdj0bYZPlvLHdcI0eP5iH97ENr+PnRdw1y1mYvbII="
     },
     {
       "source": {
@@ -58,8 +58,8 @@
           "subdir": "grafana-builder"
         }
       },
-      "version": "970b0dd2fc5b896406eba258cad78b7e0b0f18bf",
-      "sum": "GRf2GvwEU4jhXV+JOonXSZ4wdDv8mnHBPCQ6TUVd+g8="
+      "version": "264a5c2078c5930af57fe2d107eff83ab63553af",
+      "sum": "0KkygBQd/AFzUvVzezE4qF/uDYgrwUXVpZfINBti0oc="
     },
     {
       "source": {
@@ -68,8 +68,8 @@
           "subdir": "1.19"
         }
       },
-      "version": "50fa5748382fbc0d6fb34105835fd07acaf0195f",
-      "sum": "OXTug8dGtUKG5MGkSdEvMllGfPitqG1kdTk4pPVSH8k="
+      "version": "42e556cf447128d9dc29aae576ae38490aed2648",
+      "sum": "NNhLK4zOVyRgrz8qs714/G+oy7GMn3Q4AbFffD7XkG4="
     },
     {
       "source": {
@@ -88,7 +88,7 @@
           "subdir": "lib/promgrafonnet"
         }
       },
-      "version": "39a9cda705b5201c35105bd1f24c83923fa839ef",
+      "version": "fd913499e956da06f520c3784c59573ee552b152",
       "sum": "zv7hXGui6BfHzE9wPatHI/AGZa4A2WKo6pq7ZdqBsps="
     },
     {
@@ -98,8 +98,8 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "f5ce7d5675d16415e60a6c979f290cca75c7f036",
-      "sum": "S5qI+PJUdNeYOv76jH5nxwYS9N6U7CRxvyuB1wI4cTE="
+      "version": "f629b2579de2ea6d1560ec3b284143dd603203f6",
+      "sum": "U1wzIpTAtOvC1yj43Y8PfvT0JfvnAcMfNH12Wi+ab0Y="
     },
     {
       "source": {
@@ -108,8 +108,8 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "504f9b785cea3a35587167710579375eafbf2e0a",
-      "sum": "os3VfjBdFdDaTYzI+A/RahIhQcgQ7KoaLL68s1kiCbA="
+      "version": "749b1a199e29b079cc4648e2fc42e334aaf9fdca",
+      "sum": "MlWDAKGZ+JArozRKdKEvewHeWn8j2DNBzesJfLVd0dk="
     }
   ],
   "legacyImports": false
