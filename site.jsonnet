@@ -9,7 +9,7 @@ local fplibs = {
 
 local fpl = if std.extVar('fpl_local') == 'true' then fplibs.dev else fplibs.release;
 
-local cert_manager = (import '../jsonnet-libs/apps/cert-manager/main.jsonnet');
+local cert_manager = fpl.apps.cert_manager;
 local tls_issuer = 'letsencrypt-production';
 local zfs = fpl.stacks.zfs {
   _config+: {
@@ -220,10 +220,10 @@ local manifests = fpl.lib.site.build({
                k.core.v1.service.spec.withType('ExternalName') +
                k.core.v1.service.spec.withExternalName('localhost'),
     },
-    'fuse-device-plugin': (import '../jsonnet-libs/apps/fuse-device-plugin/main.jsonnet').new({
+    'fuse-device-plugin': fpl.apps.fuse_device_plugin.new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
     }),
-    registry: (import '../jsonnet-libs/apps/registry/main.libsonnet').new({
+    registry: fpl.apps.registry.new({
       host: 'registry.' + domain,
       storage_class: 'zfs-stripe-ssd',
       htpasswd: std.extVar('registry_htpasswd'),
@@ -257,7 +257,7 @@ local manifests = fpl.lib.site.build({
         },
       },
     },
-    oauth2_proxy: (import '../jsonnet-libs/apps/oauth2-proxy/main.libsonnet').new({
+    oauth2_proxy: fpl.apps.oauth2_proxy.new({
       namespace: 'ingress-nginx',
       client_id: 'd57fc7ff4afeeb24fc66',
       client_secret: std.extVar('oauth2_proxy_client_secret'),
@@ -275,7 +275,7 @@ local manifests = fpl.lib.site.build({
     }) + cert_manager.withCertManagerTLS(tls_issuer),
   },
   jupyter: {
-    jupyter: (import 'github.com/5pi/jsonnet-libs/apps/jupyterlab/main.libsonnet').new({
+    jupyter: fpl.apps.jupyterlab.new({
       host: 'jupyter.' + domain,
       node_selector: { 'kubernetes.io/hostname': 'filer' },
       data_path: '/pool-mirror/jupyter',
