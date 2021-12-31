@@ -6,4 +6,4 @@
 --ext-str oauth2_proxy_client_secret=$(pass home/oauth2_proxy/client_secret)
 --ext-str registry_htpasswd=$(htpasswd -nbB default $(pass home/image-registry/default))
 --ext-str registry_password=$(pass home/image-registry/default)
---ext-str fpl_local=true
+--ext-str fpl_local=${FPL_LOCAL:-true}
