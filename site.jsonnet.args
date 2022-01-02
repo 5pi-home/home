@@ -6,4 +6,6 @@
 --ext-str oauth2_proxy_client_secret=$(pass home/oauth2_proxy/client_secret)
 --ext-str registry_htpasswd=$(htpasswd -nbB default $(pass home/image-registry/default))
 --ext-str registry_password=$(pass home/image-registry/default)
+--ext-str "k8s_webhook_handler_webhook_secret=$(pass k8s-webhook-handler-secret)"
+--ext-str "k8s_webhook_handler_github_token=$(pass github/k8s-webhook-handler-token)"
 --ext-str fpl_local=${FPL_LOCAL:-true}

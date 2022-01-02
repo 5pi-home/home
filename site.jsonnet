@@ -307,6 +307,18 @@ local manifests = fpl.lib.site.build({
   monitoring: monitoring,
   media: media,
   home_automation: home_automation,
+  ci: {
+    k8s_webhook_handler: fpl.apps.k8s_webhook_handler.new({
+      host: 'k8s-webhook-handler.' + domain,
+      webhook_secret: std.extVar('k8s_webhook_handler_webhook_secret'),
+      github_token: std.extVar('k8s_webhook_handler_github_token'),
+      node_selector: { 'kubernetes.io/arch': 'amd64' },
+    }) + {
+      ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+        'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+      }),
+    } + cert_manager.withCertManagerTLS(tls_issuer),
+  },
 });
 
 local namespaces = std.uniq(std.sort([
