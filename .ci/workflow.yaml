@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+ name: 5pi-home-site-build
+ namespace: ci
+spec:
+  template:
+    metadata:
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/builder: unconfined
+    spec:
+      securityContext:
+        runAsUser: 1000
+      restartPolicy: OnFailure
+      nodeSelector:
+        "kubernetes.io/hostname": "filer"
+      initContainers:
+        - name: checkout
+          image: quay.io/bitnami/git:2.34.1
+          env:
+            - name: REF
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations["k8s-webhook-handler.io/ref"]
+            - name: REVISION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations["k8s-webhook-handler.io/revision"]
+            - name: REPO_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations["k8s-webhook-handler.io/repo_name"]
+            - name: EVENT_TYPE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations["k8s-webhook-handler.io/event_type"]
+            - name: EVENT_ACTION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations["k8s-webhook-handler.io/event_action"]
+          workingDir: /usr/src
+          volumeMounts:
+            - mountPath: /usr/src
+              name: source
+          command:
+            - /bin/bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              if [[ "$EVENT_TYPE" != "push" ]]; then
+                echo "Ignoring event $EVENT_TYPE"
+                exit 0
+              fi
+              BRANCH="${REF#refs/heads/}"
+              git clone "https://github.com/${REPO_NAME}.git" \
+                --branch "$BRANCH" \
+                --single-branch .
+              git reset --hard "${REVISION}"
+      containers:
+        - name: builder
+          image: registry.d.42o.de/home:be0ae31483
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: k8s-webhook-handler
+                  key: github-token
+          workingDir: /usr/src
+          command:
+            - /bin/bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              jb install
+              gpg --import < /home/user/pass-gpg/gpg-key
+              cat <<EOF > ~/.netrc
+              machine github.com
+              login 5pi-bot
+              password $GITHUB_TOKEN
+              EOF
+              git clone https://github.com/5pi-home/pass.git ~/.password-store
+              FPL_LOCAL=false ./generate site.jsonnet
+          volumeMounts:
+            - mountPath: /usr/src
+              name: source
+            - mountPath: /home/user/pass-gpg
+              name: pass-gpg
+      volumes:
+        - name: source
+          emptyDir: {}
+        - name: pass-gpg
+          secret:
+            secretName: 5pi-home-pass-gpg-key
