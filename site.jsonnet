@@ -199,6 +199,22 @@ local minecraft =
   };
 
 local manifests = fpl.lib.site.build({
+  cluster_scope: {
+    storage: {
+      volume_snapshot_class: {
+        kind: 'VolumeSnapshotClass',
+        apiVersion: 'snapshot.storage.k8s.io/v1beta1',
+        metadata: {
+          name: 'default-snapshot-class',
+          annotations: {
+            'snapshot.storage.kubernetes.io/is-default-class': 'true',
+          },
+        },
+        driver: 'zfs.csi.openebs.io',
+        deletionPolicy: 'Delete',
+      },
+    },
+  },
   'kube-system': {
     coredns: {
       configmap:
