@@ -95,6 +95,12 @@ local monitoring = fpl.stacks.monitoring {
               targets: ['n-office', 'n-bedroom', 'n-living'],
             }],
           },
+          {
+            job_name: 'wmi',
+            static_configs: [{
+              targets: ['leviathan:9182'],
+            }],
+          },
         ],
       },
 
