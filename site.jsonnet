@@ -329,6 +329,9 @@ local manifests = fpl.lib.site.build({
   monitoring: monitoring,
   media: media,
   home_automation: home_automation,
+  argo: {
+    argo: fpl.apps.argo.new({}),
+  },
   ci: {
     k8s_webhook_handler: fpl.apps.k8s_webhook_handler.new({
       host: 'k8s-webhook-handler.' + domain,

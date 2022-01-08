@@ -17,37 +17,21 @@ spec:
       initContainers:
         - name: checkout
           image: quay.io/bitnami/git:2.34.1
-          env:
-            - name: REF
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations["k8s-webhook-handler.io/ref"]
-            - name: REVISION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations["k8s-webhook-handler.io/revision"]
-            - name: REPO_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations["k8s-webhook-handler.io/repo_name"]
-            - name: EVENT_TYPE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations["k8s-webhook-handler.io/event_type"]
-            - name: EVENT_ACTION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations["k8s-webhook-handler.io/event_action"]
           workingDir: /usr/src
           volumeMounts:
             - mountPath: /usr/src
               name: source
+            - mountPath: /downward
+              name: downward
           command:
             - /bin/bash
             - -euo
             - pipefail
             - -c
             - |
+              cat /downward/annotations
+              exit 0
+
               if [[ "$EVENT_TYPE" != "push" ]]; then
                 echo "Ignoring event $EVENT_TYPE"
                 exit 0
@@ -93,3 +77,9 @@ spec:
         - name: pass-gpg
           secret:
             secretName: 5pi-home-pass-gpg-key
+        - name: downward
+          downwardAPI:
+            items:
+              - path: annotations
+                fieldRef:
+                  fieldPath: metadata.annotations
