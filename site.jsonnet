@@ -178,14 +178,14 @@ local minecraft =
   (import 'github.com/discordianfish/minecraft/lib/minecraft/kubernetes.jsonnet') +
   {
     _config+: {
-      image: 'docker.io/fish/minecraft:50353b060d6674a179c2ddef2fab4a0fdcfb28a1',
+      image: 'fish/minecraft:1a0cbc486a56a58b1fed7e0ce5a922e35fbd3ab0',
       single_node: false,
-      memory_limit: 2 * 1024 + 'M',
+      memory_limit: 4 * 1024 + 'M',
     },
     // container:: super,
     deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
   } +
-  fpl.lib.app.withPVC('minecraft', '30G', '/data', 'zfs-stripe-ssd') +
+  fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
   fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
   cert_manager.withCertManagerTLS(tls_issuer) + {
     ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
