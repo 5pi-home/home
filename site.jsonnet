@@ -101,6 +101,12 @@ local monitoring = fpl.stacks.monitoring {
               targets: ['leviathan:9182'],
             }],
           },
+          {
+            job_name: 'nvidia-gpu-exporter',
+            static_configs: [{
+              targets: ['leviathan:9835'],
+            }],
+          },
         ],
       },
 
