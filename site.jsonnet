@@ -345,7 +345,12 @@ local manifests = fpl.lib.site.build({
   media: media,
   home_automation: home_automation,
   argo: {
-    argo: fpl.apps.argo.new({}),
+    argo: fpl.apps.argo.new({
+      node_selector: { 'kubernetes.io/arch': 'amd64' },
+      config: {
+        containerRuntimeExecutor: 'emissary',
+      },
+    }),
   },
   ci: {
     k8s_webhook_handler: fpl.apps.k8s_webhook_handler.new({
