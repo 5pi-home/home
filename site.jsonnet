@@ -13,7 +13,22 @@ local cert_manager = fpl.apps.cert_manager;
 local tls_issuer = 'letsencrypt-production';
 local zfs = fpl.stacks.zfs {
   _config+: {
-    pools: ['mirror', 'stripe-ssd'],
+    pools: [
+      {
+        name: 'zfs-mirror',
+        pool_name: 'pool-mirror',
+        hostname: 'filer',
+      },
+      {
+        name: 'zfs-stripe-ssd',
+        pool_name: 'pool-stripe-ssd',
+        hostname: 'filer',
+      },
+      {
+        name: 'pool-mirror-hdd',
+        hostname: 'filer',
+      },
+    ],
   },
 };
 
@@ -21,7 +36,7 @@ local media = fpl.stacks.media {
   _config+: {
     domain: domain,
     storage_class: 'zfs-stripe-ssd',
-    media_path: '/pool-mirror/media',
+    media_path: '/pool-mirror-hdd/media',
 
     usenet: {
       server1_username: std.extVar('media_server1_username'),
@@ -306,7 +321,7 @@ local manifests = fpl.lib.site.build({
     jupyter: fpl.apps.jupyterlab.new({
       host: 'jupyter.' + domain,
       node_selector: { 'kubernetes.io/hostname': 'filer' },
-      data_path: '/pool-mirror/jupyter',
+      data_path: '/pool-mirror-hdd/jupyter',
     }) + cert_manager.withCertManagerTLS(tls_issuer),
   },
 
