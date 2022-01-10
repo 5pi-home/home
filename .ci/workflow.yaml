@@ -4,15 +4,73 @@ metadata:
   generateName: ci-k8s-webhook-handler-
   namespace: ci
 spec:
-  entrypoint: build
+  entrypoint: entry
   securityContext:
     runAsUser: 1000
   volumes:
     - name: pass-gpg
       secret:
         secretName: 5pi-home-pass-gpg-key
+    - name: image-pull-secret
+      secret:
+        secretName: image-pull-secret
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+    - name: podman-local
+      hostPath:
+        path: /tmp/podman-containers
+    - name: tls-certs
+      hostPath:
+        path: /etc/ssl/certs
   templates:
-    - name: build
+    - name: entry
+      dag:
+        tasks:
+          - name: build-image
+            template: build-image
+          - name: build-manifests
+            template: build-manifests
+            depends: build-image
+              #          - name: deploy_manifests
+              #            depends: build_manifests
+
+    - name: build-image
+      inputs:
+        artifacts:
+          - name: source
+            path: /src
+            git:
+              repo: "https://github.com/5pi-home/home.git"
+              revision: "{{workflow.annotations.k8s-webhook-handler.io/revision}}"
+      metadata:
+        annotations:
+          container.apparmor.security.beta.kubernetes.io/main: unconfined
+      nodeSelector:
+        "kubernetes.io/hostname": "filer"
+      script:
+        image: quay.io/podman/stable
+        workingDir: /src
+        command: [bash]
+        resources:
+          limits:
+            github.com/fuse: 1
+        volumeMounts:
+          - mountPath: /home/podman/.docker
+            name: image-pull-secret
+          - mountPath: /home/podman/.local/share/containers
+            name: podman-local
+          - mountPath: /etc/ssl/certs
+            name: tls-certs
+            readOnly: true
+        source: |
+          set -euo pipefail
+          IMAGE="registry.d.42o.de/home:{{workflow.annotations.k8s-webhook-handler.io/revision}}"
+          podman build --isolation chroot -t "$IMAGE" .
+          podman push "$IMAGE"
+          echo "Pushed $IMAGE sucessfully"
+
+    - name: build-manifests
       inputs:
         artifacts:
           - name: source
@@ -31,13 +89,10 @@ spec:
               passwordSecret:
                 name: k8s-webhook-handler
                 key: github-token
-      metadata:
-        annotations:
-          container.apparmor.security.beta.kubernetes.io/main: unconfined
       nodeSelector:
         "kubernetes.io/arch": amd64
       script:
-        image: registry.d.42o.de/home:be0ae31483
+        image: "registry.d.42o.de/home:{{workflow.annotations.k8s-webhook-handler.io/revision}}"
         workingDir: /src
         command: [bash]
         volumeMounts:
@@ -47,8 +102,3 @@ spec:
           jb install
           gpg --import < /home/user/pass-gpg/gpg-key
           FPL_LOCAL=false ./generate site.jsonnet
-
-      outputs:
-        artifacts:
-        - name: manifests
-          path: /src/build
