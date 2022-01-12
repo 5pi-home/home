@@ -373,6 +373,19 @@ local manifests = fpl.lib.site.build({
       ),
       service_account+: k.core.v1.serviceAccount.withImagePullSecrets([{ name: 'image-pull-secret' }]),
     } + cert_manager.withCertManagerTLS(tls_issuer),
+    deployer: {
+      service_account: k.core.v1.serviceAccount.new('ci-deployer') +
+                       k.core.v1.serviceAccount.metadata.withNamespace('ci') +
+                       k.core.v1.serviceAccount.withImagePullSecrets([{ name: 'image-pull-secret' }]),
+      admin_cluster_role_binding:
+        k.rbac.v1.clusterRoleBinding.new('ci-deployer-admin') +
+        k.rbac.v1.clusterRoleBinding.roleRef.withApiGroup('rbac.authorization.k8s.io') +
+        k.rbac.v1.clusterRoleBinding.roleRef.withKind('ClusterRole') +
+        k.rbac.v1.clusterRoleBinding.roleRef.withName('cluster-admin') +
+        k.rbac.v1.clusterRoleBinding.withSubjects([
+          k.rbac.v1.subject.fromServiceAccount(self.service_account),
+        ]),
+    },
   },
 });
 
