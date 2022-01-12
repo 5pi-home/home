@@ -101,7 +101,7 @@ spec:
           jb install
           gpg --import < /home/user/pass-gpg/gpg-key
           FPL_LOCAL=false ./generate site.jsonnet
-          if [[ "{workflow.annotations.k8s-webhook-handler.io/ref}" != "refs/heads/main" ]]; then
+          if [[ "{{workflow.annotations.k8s-webhook-handler.io/ref}}" != "refs/heads/main" ]]; then
             echo "Not on main branch, skipping deployment"
             exit 0
           fi
