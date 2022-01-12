@@ -347,6 +347,7 @@ local manifests = fpl.lib.site.build({
   argo: {
     argo: fpl.apps.argo.new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
+      server_args: ['--auth-mode', 'server'],
       config: {
         containerRuntimeExecutor: 'emissary',
       },
