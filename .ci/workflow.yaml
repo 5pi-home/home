@@ -29,11 +29,9 @@ spec:
         tasks:
           - name: build-image
             template: build-image
-          - name: build-manifests
-            template: build-manifests
+          - name: build-and-deploy-manifests
+            template: build-and-deploy-manifests
             depends: build-image
-              #          - name: deploy_manifests
-              #            depends: build_manifests
 
     - name: build-image
       inputs:
@@ -70,7 +68,7 @@ spec:
           podman push "$IMAGE"
           echo "Pushed $IMAGE sucessfully"
 
-    - name: build-manifests
+    - name: build-and-deploy-manifests
       inputs:
         artifacts:
           - name: source
@@ -102,3 +100,8 @@ spec:
           jb install
           gpg --import < /home/user/pass-gpg/gpg-key
           FPL_LOCAL=false ./generate site.jsonnet
+          if [[ "{workflow.annotations.k8s-webhook-handler.io/ref}" != "refs/heads/main" ]]; then
+            echo "Not on main branch, skipping deployment"
+            exit 0
+          fi
+          kubectl apply -R -f build/site.jsonnet/
