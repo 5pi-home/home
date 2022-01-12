@@ -4,6 +4,7 @@ metadata:
   generateName: ci-k8s-webhook-handler-
   namespace: ci
 spec:
+  serviceAccountName: ci-deployer
   entrypoint: entry
   securityContext:
     runAsUser: 1000
