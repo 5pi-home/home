@@ -203,7 +203,7 @@ local minecraft =
       single_node: false,
       memory_limit: 4 * 1024 + 'M',
     },
-    // container:: super,
+    container+: k.core.v1.container.resources.withRequests({ memory: $._config.memory_limit }),
     deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
   } +
   fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
