@@ -195,29 +195,29 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
-local minecraft =
-  (import 'github.com/discordianfish/minecraft/lib/minecraft/kubernetes.jsonnet') +
-  {
-    _config+: {
-      image: 'fish/minecraft:1a0cbc486a56a58b1fed7e0ce5a922e35fbd3ab0',
-      single_node: false,
-      memory_limit: 4 * 1024 + 'M',
-    },
-    container+: k.core.v1.container.resources.withRequests({ memory: $._config.memory_limit }),
-    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
-  } +
-  fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
-  fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
-  cert_manager.withCertManagerTLS(tls_issuer) + {
-    ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
-      'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
-    }),
-    service+: k.core.v1.service.spec.withPortsMixin([
-      k.core.v1.servicePort.newNamed('game', 25565, 25565),
-      k.core.v1.servicePort.newNamed('game-udp', 19132, 19132) +
-      k.core.v1.servicePort.withProtocol('UDP'),
-    ]),
-  };
+local minecraft_config = {
+  image: 'fish/minecraft:1a0cbc486a56a58b1fed7e0ce5a922e35fbd3ab0',
+  single_node: false,
+  memory_limit_mb: 4 * 1024,
+};
+
+local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraft/main.jsonnet').new(minecraft_config);
+local minecraft = minecraft_app.manifests {
+                    container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
+                    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
+                  } +
+                  fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
+                  fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
+                  cert_manager.withCertManagerTLS(tls_issuer) + {
+  ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+    'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+  }),
+  service+: k.core.v1.service.spec.withPortsMixin([
+    k.core.v1.servicePort.newNamed('game', 25565, 25565),
+    k.core.v1.servicePort.newNamed('game-udp', 19132, 19132) +
+    k.core.v1.servicePort.withProtocol('UDP'),
+  ]),
+};
 
 local manifests = fpl.lib.site.build({
   cluster_scope: {
