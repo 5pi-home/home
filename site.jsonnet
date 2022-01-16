@@ -1,6 +1,8 @@
 local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
 
 local domain = 'd.42o.de';
+local image_registry = 'registry.' + domain;
+local version = std.extVar('version');
 
 local fplibs = {
   release: import 'github.com/5pi/jsonnet-libs/main.libsonnet',
@@ -196,15 +198,24 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
 });
 
 local minecraft_config = {
-  image: 'fish/minecraft:1a0cbc486a56a58b1fed7e0ce5a922e35fbd3ab0',
+  image: image_registry + '/minecraft:' + version,
+  papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/134/downloads/paper-1.18.1-134.jar',
   single_node: false,
+  plugins: [
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/amk_mc_auth_se.jsonnet'),
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/grief_prevention.jsonnet'),
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/geyser.jsonnet'),
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/dynmap.jsonnet'),
+  ],
   memory_limit_mb: 4 * 1024,
+  build_job: true,
 };
 
 local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraft/main.jsonnet').new(minecraft_config);
 local minecraft = minecraft_app.manifests {
                     container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
                     deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
+                    podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft'),
                   } +
                   fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
                   fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
@@ -267,7 +278,7 @@ local manifests = fpl.lib.site.build({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
     }),
     registry: fpl.apps.registry.new({
-      host: 'registry.' + domain,
+      host: image_registry,
       storage_class: 'zfs-stripe-ssd',
       htpasswd: std.extVar('registry_htpasswd'),
     }) + {

@@ -28,8 +28,8 @@
           "subdir": ""
         }
       },
-      "version": "a0cc9f3e01cb7eb0e6e0860df2fd66ff651f0d05",
-      "sum": "f9BrmngcF5Uoe20nvXWV/r5lsbMnOfieeKiOiYtEt6I="
+      "version": "ef30999afa9a00b2c4e012334a3702c2864cd356",
+      "sum": "HHzpCIExgKhcvgp7YFb0/luYR97JlPUMa9irwr2EYfo="
     },
     {
       "source": {
@@ -48,8 +48,8 @@
           "subdir": ""
         }
       },
-      "version": "f39e01d11daa07f7baaea9e1f7126e0894c740f0",
-      "sum": "+Ryc76rAwGHkaVQFGPoORXFYKCSAhr5VGXEkfcs9JRM="
+      "version": "38443f6f8d8ee1e44d2753f5c92dcfe418e08225",
+      "sum": "gLGBRcXez9KDx6FmfDi/u1oxzCST/tLQB48DtYKS9UQ="
     },
     {
       "source": {
@@ -58,7 +58,7 @@
           "subdir": "grafana-builder"
         }
       },
-      "version": "f39e01d11daa07f7baaea9e1f7126e0894c740f0",
+      "version": "38443f6f8d8ee1e44d2753f5c92dcfe418e08225",
       "sum": "0KkygBQd/AFzUvVzezE4qF/uDYgrwUXVpZfINBti0oc="
     },
     {
