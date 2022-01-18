@@ -198,7 +198,7 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
 });
 
 local minecraft_config = {
-  image: image_registry + '/minecraft:' + version,
+  image: image_registry + '/minecraft:' + version,  // FIXME: This causes rebuild and restart on every change to this repo...
   papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/134/downloads/paper-1.18.1-134.jar',
   single_node: false,
   plugins: [
@@ -215,7 +215,8 @@ local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraf
 local minecraft = minecraft_app.manifests {
                     container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
                     deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
-                    podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft'),
+                    podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
+                                       k.batch.v1.job.spec.template.spec.withNodeSelector({ node_selector: { 'kubernetes.io/hostname': 'filer' } }),
                   } +
                   fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
                   fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
