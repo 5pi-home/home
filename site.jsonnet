@@ -3,6 +3,11 @@ local k = import 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet';
 local domain = 'd.42o.de';
 local image_registry = 'registry.' + domain;
 local version = std.extVar('version');
+local jb_dep_sums = {
+  [dep.source.git.remote]: dep.sum
+
+  for dep in std.extVar('jsonnetfile_lock').dependencies
+};
 
 local fplibs = {
   release: import 'github.com/5pi/jsonnet-libs/main.libsonnet',
@@ -198,7 +203,6 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
 });
 
 local minecraft_config = {
-  image: image_registry + '/minecraft:' + version,  // FIXME: This causes rebuild and restart on every change to this repo...
   papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/134/downloads/paper-1.18.1-134.jar',
   single_node: false,
   plugins: [
@@ -211,12 +215,19 @@ local minecraft_config = {
   build_job: true,
 };
 
-local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraft/main.jsonnet').new(minecraft_config);
+local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraft/main.jsonnet').new(
+  minecraft_config {
+    image: image_registry + '/minecraft:' + std.md5(
+      std.manifestJsonEx(minecraft_config { jb_sum: jb_dep_sums['https://github.com/discordianfish/minecraft.git'] }, ' ')
+    ),
+  }
+);
+
 local minecraft = minecraft_app.manifests {
                     container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
                     deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
                     podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
-                                       k.batch.v1.job.spec.template.spec.withNodeSelector({ node_selector: { 'kubernetes.io/hostname': 'filer' } }),
+                                       k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
                   } +
                   fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
                   fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
