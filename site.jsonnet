@@ -68,50 +68,6 @@ local monitoring = fpl.stacks.monitoring {
       prometheus_config+: {
         scrape_configs+: [
           {
-            job_name: 'pluto-node-exporter',
-            static_configs: [{
-              targets: ['78.47.234.52:9100'],
-            }],
-          },
-          {
-            job_name: 'macbook-node-exporter',
-            static_configs: [{
-              targets: ['192.168.1.188:9100'],
-            }],
-          },
-          {
-            job_name: 'pluto-kubelet',
-            scheme: 'https',
-            tls_config: {
-              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-              insecure_skip_verify: true,
-            },
-            static_configs: [{
-              targets: [
-                '78.47.234.52:10250',
-                '78.47.234.52:10250',
-              ],
-            }],
-          },
-          {
-            job_name: 'pluto-cadvisor',
-            scheme: 'https',
-            tls_config: {
-              ca_file: '/etc/prometheus/pluto-kubelet-ca/ca.pem',
-              cert_file: '/etc/prometheus/pluto-kubelet/tls.crt',
-              key_file: '/etc/prometheus/pluto-kubelet/tls.key',
-              insecure_skip_verify: true,
-            },
-            metrics_path: '/metrics/cadvisor',
-            static_configs: [{
-              targets: [
-                '78.47.234.52:10250',
-              ],
-            }],
-          },
-          {
             job_name: 'mouldy',
             static_configs: [{
               targets: ['n-office', 'n-bedroom', 'n-living'],
@@ -210,6 +166,7 @@ local minecraft_config = {
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/grief_prevention.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/geyser.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/dynmap.jsonnet'),
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/prometheus_exporter.jsonnet'),
   ],
   memory_limit_mb: 4 * 1024,
   build_job: true,
@@ -225,7 +182,8 @@ local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraf
 
 local minecraft = minecraft_app.manifests {
                     container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
-                    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft'),
+                    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft') +
+                                 k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9225' }),
                     podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
                                        k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
                   } +
