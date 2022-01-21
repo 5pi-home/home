@@ -139,6 +139,16 @@ local monitoring = fpl.stacks.monitoring {
       'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
     }) + cert_manager.ingressCertManagerTLSMixin($._config.grafana.external_domain, tls_issuer),
   },
+  _grafana+:: {
+    _config+:: {
+      grafana+:: {
+        dashboards+:: {
+          'minecraft-server.json': (import 'files/grafana-dashboards/minecraft-server-dashboard.json'),
+          'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
+        },
+      },
+    },
+  },
 
   // grafana+: cert_manager.withCertManagerTLS(tls_issuer),
 };

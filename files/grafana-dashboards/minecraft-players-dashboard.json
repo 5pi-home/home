@@ -1,40 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "6.4.2"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-piechart-panel",
-      "name": "Pie Chart",
-      "version": "1.3.9"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": ""
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -60,7 +24,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "$datasource",
       "decimals": 0,
       "fill": 1,
       "fillGradient": 0,
@@ -153,7 +117,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "$datasource",
       "decimals": 3,
       "fill": 1,
       "fillGradient": 0,
@@ -243,51 +207,6 @@
         "alignLevel": null
       }
     },
-    {
-      "aliasColors": {},
-      "breakPoint": "50%",
-      "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": 0
-      },
-      "datasource": "${DS_PROMETHEUS}",
-      "fontSize": "80%",
-      "format": "short",
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 5
-      },
-      "hideTimeOverride": false,
-      "id": 6,
-      "interval": null,
-      "legend": {
-        "show": true,
-        "values": true
-      },
-      "legendType": "Under graph",
-      "links": [],
-      "maxDataPoints": 3,
-      "nullPointMode": "connected",
-      "options": {},
-      "pieType": "pie",
-      "strokeWidth": 1,
-      "targets": [
-        {
-          "expr": "sum(mc_player_statistic{player_name=~\"$player\", statistic=\"$statistic\", server_name=~\"$server_name\"}) without (player_uid)",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{player_name}}: {{statistic}}",
-          "refId": "A"
-        }
-      ],
-      "title": "$statistic by player",
-      "type": "grafana-piechart-panel",
-      "valueName": "current"
-    }
   ],
   "refresh": "30s",
   "schemaVersion": 20,
@@ -296,9 +215,23 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "text": "default",
+          "value": "default"
+        },
+        "hide": 0,
+        "label": "Data Source",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
         "allValue": ".+",
         "current": {},
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "$datasource",
         "definition": "",
         "hide": 0,
         "includeAll": true,
@@ -320,7 +253,7 @@
       {
         "allValue": ".+",
         "current": {},
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "$datasource",
         "definition": "",
         "hide": 0,
         "includeAll": true,
@@ -328,7 +261,7 @@
         "multi": true,
         "name": "player",
         "options": [],
-        "query": "label_values(mc_player_online, name)",
+        "query": "label_values(mc_player_statistic, name)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -342,7 +275,7 @@
       {
         "allValue": ".*",
         "current": {},
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": "$datasource",
         "definition": "",
         "hide": 0,
         "includeAll": false,
@@ -393,7 +326,7 @@
     ]
   },
   "timezone": "",
-  "title": "Players",
+  "title": "Minecraft Players",
   "uid": "of8FDYamk",
   "version": 13
 }
