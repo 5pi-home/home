@@ -10,3 +10,4 @@
 --ext-str "k8s_webhook_handler_webhook_secret=$(pass k8s-webhook-handler-secret)"
 --ext-str "k8s_webhook_handler_github_token=$(pass github/k8s-webhook-handler-token)"
 --ext-str fpl_local=${FPL_LOCAL:-true}
+--ext-str include_images=true

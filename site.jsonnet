@@ -52,6 +52,15 @@ local media = fpl.stacks.media {
 
     timezone: 'Europe/Berlin',
     plex_env: [{ name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') }],
+    nzbget+: {
+      image: image_registry + '/nzbget:' + std.md5(std.manifestJsonEx($.nzbget.image.spec.containerfile, '  ')),
+    },
+    sonarr+: {
+      image: image_registry + '/sonarr:' + std.md5(std.manifestJsonEx($.sonarr.image.spec.containerfile, '  ')),
+    },
+    radarr+: {
+      image: image_registry + '/radarr:' + std.md5(std.manifestJsonEx($.radarr.image.spec.containerfile, '  ')),
+    },
   },
   nzbget+: cert_manager.withCertManagerTLS(tls_issuer),
   radarr+: cert_manager.withCertManagerTLS(tls_issuer),
