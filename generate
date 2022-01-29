@@ -9,4 +9,4 @@ opts=""
 [[ -s "$args" ]] && opts=($(cat "$args"))
 
 rm -rf "build/$out"
-eval --  "$jsonnet" "${opts[@]}" --ext-code-file "jsonnetfile_lock=jsonnetfile.lock.json" -J vendor/ -J vendor-local/ "$site" -S -c -m "build/$out"
+eval --  "$jsonnet" "${opts[@]}" --ext-code-file "jsonnetfile_lock=jsonnetfile.lock.json" -J vendor/ -J . "$site" -S -c -m "build/$out"
