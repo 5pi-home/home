@@ -13,7 +13,16 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/discordianfish/minecraft.git",
+          "remote": "https://github.com/brancz/kubernetes-grafana.git",
+          "subdir": "grafana"
+        }
+      },
+      "version": "c3b14b24b83cfe9abf1064649d19e2d679f033fb"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/discordianfish/k8s-image-controller.git",
           "subdir": ""
         }
       },
@@ -22,11 +31,11 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/brancz/kubernetes-grafana.git",
-          "subdir": "grafana"
+          "remote": "https://github.com/discordianfish/minecraft.git",
+          "subdir": ""
         }
       },
-      "version": "c3b14b24b83cfe9abf1064649d19e2d679f033fb"
+      "version": "main"
     },
     {
       "source": {

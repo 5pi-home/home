@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "7db7cd18d0f4f62d110fde2305e08bac8aeed13f",
-      "sum": "VjB93RoUQNMw7nHnnY42WXVkvz/jRZKzRKCRj7e1i2E="
+      "version": "84bb9172bc07ee97d587b2a7cf334c4c09247278",
+      "sum": "zDpeLC2gRbYRfjtEKo/wZQHAIiut2boc9eItJE+yQpE="
     },
     {
       "source": {
@@ -20,6 +20,16 @@
       },
       "version": "c3b14b24b83cfe9abf1064649d19e2d679f033fb",
       "sum": "YrE4DNQsWgYWs6h0j/FjQETt8xDXdYdsslb1WK7xQEk="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/discordianfish/k8s-image-controller.git",
+          "subdir": ""
+        }
+      },
+      "version": "54c0c1568fabfc9cf597c40f5d347f9c936b203a",
+      "sum": "qk40McVgDodHKQLfcgVbIbAVbGQM+wOGTx7EytxwWYc="
     },
     {
       "source": {
