@@ -105,4 +105,6 @@ spec:
             echo "Not on main branch, skipping deployment"
             exit 0
           fi
+          find . -name image.yaml -exec kubectl apply -f {} \;
+          find . -name image.yaml -exec kubectl wait -f {} --timeout=1h --for=condition=Ready \;
           kubectl apply -R -f build/site.jsonnet/
