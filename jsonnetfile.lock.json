@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "84bb9172bc07ee97d587b2a7cf334c4c09247278",
-      "sum": "zDpeLC2gRbYRfjtEKo/wZQHAIiut2boc9eItJE+yQpE="
+      "version": "d5813a4918248307e67edbb123ba99b057ac9112",
+      "sum": "4P3utb0MD7asAoygckcAPTOSxVujm2GUgJ4pBjJyy54="
     },
     {
       "source": {
@@ -28,8 +28,8 @@
           "subdir": ""
         }
       },
-      "version": "54c0c1568fabfc9cf597c40f5d347f9c936b203a",
-      "sum": "qk40McVgDodHKQLfcgVbIbAVbGQM+wOGTx7EytxwWYc="
+      "version": "76bd8cfaa308e8de116e3ed19d6e6d559eb208b1",
+      "sum": "y4ZWPPi55T/067+srSbG7In2+8heTbhle07x0J4bFwQ="
     },
     {
       "source": {
@@ -58,8 +58,8 @@
           "subdir": ""
         }
       },
-      "version": "5a128df878434da37969b811e99bb9cd0a3779e3",
-      "sum": "gVuh03hAtRXU/6gLEei1KwlNsTc4VEnT21UB3d+c3TU="
+      "version": "d403990ef53941713a9cba838be7205ef82bab84",
+      "sum": "Op3BwUwGoRY8AaW+RD4sAMmUkRzJHP4pvath+P2Ri0c="
     },
     {
       "source": {
@@ -68,7 +68,7 @@
           "subdir": "grafana-builder"
         }
       },
-      "version": "5a128df878434da37969b811e99bb9cd0a3779e3",
+      "version": "d403990ef53941713a9cba838be7205ef82bab84",
       "sum": "0KkygBQd/AFzUvVzezE4qF/uDYgrwUXVpZfINBti0oc="
     },
     {
@@ -80,6 +80,16 @@
       },
       "version": "42e556cf447128d9dc29aae576ae38490aed2648",
       "sum": "NNhLK4zOVyRgrz8qs714/G+oy7GMn3Q4AbFffD7XkG4="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
+          "subdir": "1.23"
+        }
+      },
+      "version": "f8efa81cf15257bd151b97e31599e20b2ba5311b",
+      "sum": "JLHC9nyHwGtnUOlRHTVUpFe0TQmK+Geh+YFx3kj6TbM="
     },
     {
       "source": {
@@ -98,7 +108,7 @@
           "subdir": "lib/promgrafonnet"
         }
       },
-      "version": "c76b9378b86d28bd617d94a57c72b4770efed510",
+      "version": "7c7993267373aef55b64019c43a3012c11966791",
       "sum": "zv7hXGui6BfHzE9wPatHI/AGZa4A2WKo6pq7ZdqBsps="
     },
     {
@@ -108,8 +118,8 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "9ea05e42fb90c1d422eef7ba713eaa4ea77e26e8",
-      "sum": "Aoy8T2dBCSNOBDZ7vE5UK/+vRiFGfP71s37aZoCtqr0="
+      "version": "34a1398f1c341697f894d07aed18ddcdd708d507",
+      "sum": "P0dCnbzyPScQGNXwXRcwiPkMLeTq0IPNbSTysDbySnM="
     },
     {
       "source": {
@@ -118,7 +128,7 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "4f27a4fd8efacdf4f738cf3608dbaee972bbf548",
+      "version": "bf320eb05f1074da874977cf5c8e41d3d3be3ab2",
       "sum": "MlWDAKGZ+JArozRKdKEvewHeWn8j2DNBzesJfLVd0dk="
     }
   ],
