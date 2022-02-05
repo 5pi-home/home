@@ -94,6 +94,30 @@ local monitoring = fpl.stacks.monitoring {
               targets: ['leviathan:9835'],
             }],
           },
+          {
+            job_name: 'blackbox-exporter',
+            params: {
+              module: ['http_2xx'],
+            },
+            metrics_path: '/probe',
+            static_configs: [{
+              targets: [
+                'https://www.pyur.com/',
+                'https://google.com/',
+                'https://5pi.de/',
+              ],
+            }],
+            relabel_configs: [{
+              source_labels: ['__address__'],
+              target_label: '__param_target',
+            }, {
+              source_labels: ['__param_target'],
+              target_label: 'instance',
+            }, {
+              target_label: '__address__',
+              replacement: 'blackbox-exporter:9115',
+            }],
+          },
         ],
       },
 
