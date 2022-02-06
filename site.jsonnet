@@ -302,7 +302,7 @@ local manifests = fpl.lib.site.build({
     } + cert_manager.withCertManagerTLS(tls_issuer),
     imagecontroller: fpl.apps.k8s_image_controller.new({
       namespace: 'kube-system',
-      image_ref: '48282092c4a82455a75e6de2a9e7bda98b27300f',
+      image_ref: 'caa47c5b000c7c2b80b944d982a6ba067bf949a5',
       image_registry: image_registry,
       image_tag: std.md5(std.manifestJsonEx($['kube-system'].imagecontroller.image.spec.containerfile, '  ')),
     }) + {
