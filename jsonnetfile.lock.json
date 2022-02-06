@@ -28,8 +28,8 @@
           "subdir": ""
         }
       },
-      "version": "e2e3263fc89300f33eec2c5716c5aaf5c812bbe7",
-      "sum": "ABA1Vxte0T8qTpTvpa440Bf4fWYRl0aDtBqCxb84/cw="
+      "version": "48282092c4a82455a75e6de2a9e7bda98b27300f",
+      "sum": "Znz9WRSzcR4RZEGv3aUMPrEFwApQzkq70DLQ9It0HFY="
     },
     {
       "source": {
@@ -128,7 +128,7 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "bf320eb05f1074da874977cf5c8e41d3d3be3ab2",
+      "version": "f7086d437bc0b652ad56fe1a775b1994d7076796",
       "sum": "MlWDAKGZ+JArozRKdKEvewHeWn8j2DNBzesJfLVd0dk="
     }
   ],
