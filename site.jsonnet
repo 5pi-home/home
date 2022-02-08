@@ -203,7 +203,7 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
 
 local minecraft_config = {
   papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/134/downloads/paper-1.18.1-134.jar',
-  single_node: false,
+  single_node: true,
   plugins: [
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/amk_mc_auth_se.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/grief_prevention.jsonnet'),
@@ -211,7 +211,7 @@ local minecraft_config = {
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/dynmap.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/prometheus_exporter.jsonnet'),
   ],
-  memory_limit_mb: 4 * 1024,
+  memory_limit_mb: 4.0 * 1024,
   build_job: true,
 };
 
@@ -224,23 +224,12 @@ local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraf
 );
 
 local minecraft = minecraft_app.manifests {
-                    container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
-                    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft') +
-                                 k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9225' }),
-                    podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
-                                       k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
-                  } +
-                  fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
-                  fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
-                  cert_manager.withCertManagerTLS(tls_issuer) + {
-  ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
-    'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
-  }),
-  service+: k.core.v1.service.spec.withPortsMixin([
-    k.core.v1.servicePort.newNamed('game', 25565, 25565),
-    k.core.v1.servicePort.newNamed('game-udp', 19132, 19132) +
-    k.core.v1.servicePort.withProtocol('UDP'),
-  ]),
+  container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
+  deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft') +
+               k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9225' }) +
+               k.apps.v1.deployment.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'pluto' }),
+  podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
+                     k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
 };
 
 local manifests = fpl.lib.site.build({

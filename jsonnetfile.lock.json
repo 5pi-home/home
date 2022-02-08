@@ -28,8 +28,8 @@
           "subdir": ""
         }
       },
-      "version": "48282092c4a82455a75e6de2a9e7bda98b27300f",
-      "sum": "Znz9WRSzcR4RZEGv3aUMPrEFwApQzkq70DLQ9It0HFY="
+      "version": "caa47c5b000c7c2b80b944d982a6ba067bf949a5",
+      "sum": "wHJszk+5cGXePs50vKU426m7hWVOm55Yw7ROxupa7nw="
     },
     {
       "source": {
@@ -38,8 +38,8 @@
           "subdir": ""
         }
       },
-      "version": "ef30999afa9a00b2c4e012334a3702c2864cd356",
-      "sum": "HHzpCIExgKhcvgp7YFb0/luYR97JlPUMa9irwr2EYfo="
+      "version": "bc555cc99107d669075768c749553f19fa431e55",
+      "sum": "MV6tYJu2TE55ZEz4Mv5m5BvIY1F0y5uPq20JZg6XibQ="
     },
     {
       "source": {
@@ -108,7 +108,7 @@
           "subdir": "lib/promgrafonnet"
         }
       },
-      "version": "481475d6dd5f297669e518365c3a1f1b040a1bc8",
+      "version": "9374730cf927a81fbf455b3e8cf2a03c01d3d394",
       "sum": "zv7hXGui6BfHzE9wPatHI/AGZa4A2WKo6pq7ZdqBsps="
     },
     {
@@ -118,7 +118,7 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "34a1398f1c341697f894d07aed18ddcdd708d507",
+      "version": "6d5a8055cb051806b72b051692252ed9814063ad",
       "sum": "P0dCnbzyPScQGNXwXRcwiPkMLeTq0IPNbSTysDbySnM="
     },
     {
