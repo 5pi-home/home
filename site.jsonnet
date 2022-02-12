@@ -411,6 +411,29 @@ local manifests = fpl.lib.site.build({
         ]),
     },
   },
+  data: {
+    rclone: fpl.apps.rclone.new({
+      namespace: 'data',
+      host: 'rclone.' + domain,
+      image: image_registry + '/rclone:' + std.md5(std.manifestJsonEx($.data.rclone.image.spec.containerfile, '  ')),
+      data_path: '/pool-mirror-hdd',
+      node_selector: { 'kubernetes.io/hostname': 'filer' },
+      uid: 1001,
+      args: ['--config', '/data/rclone/rclone.conf'],
+      jobs: [
+        {
+          name: 'gdrive-daily',
+          schedule: '15 4 * * *',
+          args: ['sync', 'GoogleDrive:/', '/data/GoogleDrive'],
+        },
+        {
+          name: 'gphotos-daily',
+          schedule: '15 4 * * *',
+          args: ['sync', 'GooglePhotos:/', '/data/GooglePhotos'],
+        },
+      ],
+    }),
+  },
 });
 
 local namespaces = std.uniq(std.sort([
