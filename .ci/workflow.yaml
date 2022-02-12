@@ -89,7 +89,7 @@ spec:
                 name: k8s-webhook-handler
                 key: github-token
       nodeSelector:
-        "kubernetes.io/arch": amd64
+        "kubernetes.io/hostname": filer
       script:
         image: "registry.d.42o.de/home:{{workflow.annotations.k8s-webhook-handler.io/revision}}"
         workingDir: /src
