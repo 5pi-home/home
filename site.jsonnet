@@ -201,8 +201,11 @@ local ingress_nginx = fpl.apps['ingress-nginx'].new({
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
+local minecraft_version = '1.18.1';
+local papermc_build = '197';
+
 local minecraft_config = {
-  papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/134/downloads/paper-1.18.1-134.jar',
+  papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/' + minecraft_version + '/builds/' + papermc_build + '/downloads/paper-' + minecraft_version + '-' + papermc_build + '.jar',
   single_node: true,
   plugins: [
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/amk_mc_auth_se.jsonnet'),
