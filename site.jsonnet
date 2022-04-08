@@ -66,6 +66,11 @@ local media = fpl.stacks.media {
   radarr+: cert_manager.withCertManagerTLS(tls_issuer),
   sonarr+: cert_manager.withCertManagerTLS(tls_issuer),
   plex+: cert_manager.withCertManagerTLS(tls_issuer),
+  spotifyd: fpl.apps.spotifyd.new({
+    image: 'docker.io/fish/spotifyd:v0.3.3',
+    node_selector: { 'kubernetes.io/hostname': 'rpi-kitchen' },
+    gid: 29, // audio
+  }),
 };
 
 local monitoring = fpl.stacks.monitoring {
