@@ -69,7 +69,10 @@ local media = fpl.stacks.media {
   spotifyd: fpl.apps.spotifyd.new({
     image: 'docker.io/fish/spotifyd:v0.3.3',
     node_selector: { 'kubernetes.io/hostname': 'rpi-kitchen' },
-    gid: 29, // audio
+    gid: 29,  // audio
+  }),
+  shairport_sync: fpl.apps.shairport_sync.new({
+    node_selector: { 'kubernetes.io/hostname': 'rpi-kitchen' },
   }),
 };
 
