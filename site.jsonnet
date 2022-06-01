@@ -183,11 +183,31 @@ local monitoring = fpl.stacks.monitoring {
         dashboards+:: {
           'minecraft-server.json': (import 'files/grafana-dashboards/minecraft-server-dashboard.json'),
           'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
+          'smokeping.json': (import 'files/grafana-dashboards/smokeping.json'),
         },
       },
     },
   },
+  smokeping_exporter: fpl.apps.smokeping_exporter.new({
+    config: std.manifestYamlDoc(
+      {
+        targets: [{
+          hosts: [
+            'google.com',
+            'heise.de',
+            '137.221.66.43',
+            '104.44.32.105',
+          ],
+        }],
+      }
+    ),
+  }) + {
+    deployment+: k.apps.v1.deployment.spec.template.spec.withNodeSelector({
+                   'kubernetes.io/hostname': 'openwrt',
+                 }) +
+                 k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9374' }),
 
+  },
   // grafana+: cert_manager.withCertManagerTLS(tls_issuer),
 };
 
