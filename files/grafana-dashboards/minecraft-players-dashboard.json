@@ -206,7 +206,7 @@
         "align": false,
         "alignLevel": null
       }
-    },
+    }
   ],
   "refresh": "30s",
   "schemaVersion": 20,
