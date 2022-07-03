@@ -347,13 +347,10 @@ local manifests = fpl.lib.site.build({
   ingress: {
     ingress_nginx: ingress_nginx {
       local container = ingress_nginx['ingress-nginx-controller-deployment'].spec.template.spec.containers[0],
-      // FIXME: We need to run as root since capabilities seem not to work on my openwrt image
       'ingress-nginx-controller-deployment'+: k.apps.v1.deployment.spec.template.spec.withContainers(
         [
           container +
-          k.core.v1.container.securityContext.withRunAsUser(0) +
-          k.core.v1.container.securityContext.capabilities.withDrop([]) +
-          k.core.v1.container.withArgs(container.args + ['--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services', '--udp-services-configmap=$(POD_NAMESPACE)/udp-services']),
+          k.core.v1.container.withArgs(container.args + ['--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services', '--udp-services-configmap=$(POD_NAMESPACE)/udp-services', '--watch-ingress-without-class']),
         ]
       ),
       'tcp-services-configmap': k.core.v1.configMap.new('tcp-services', { '25565': 'minecraft/minecraft:25565' }) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
@@ -362,7 +359,6 @@ local manifests = fpl.lib.site.build({
         data: {
           'global-auth-url': 'https://oauth2-proxy.' + domain + '/oauth2/auth',
           'global-auth-signin': 'https://oauth2-proxy.' + domain + '/start?rd=$scheme://$host$request_uri',
-          'main-snippet': 'user root;',  // Required for nginx to be able to read passwd files written by ingress controller
         },
       },
     },
@@ -381,7 +377,13 @@ local manifests = fpl.lib.site.build({
         '--cookie-domain=.' + domain,
         '--whitelist-domain=.' + domain,
       ],
-    }) + cert_manager.withCertManagerTLS(tls_issuer),
+    }) + cert_manager.withCertManagerTLS(tls_issuer) + {
+      ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin(
+        {
+          'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+        },
+      ),
+    },
   },
   jupyter: {
     jupyter: fpl.apps.jupyterlab.new({
