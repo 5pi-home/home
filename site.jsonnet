@@ -225,7 +225,7 @@ local home_automation = fpl.stacks['home-automation'] {
 };
 
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
-  host_mode: true,
+  host_mode: false,
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
