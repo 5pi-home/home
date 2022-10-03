@@ -74,6 +74,9 @@ local media = fpl.stacks.media {
   shairport_sync: fpl.apps.shairport_sync.new({
     node_selector: { 'kubernetes.io/hostname': 'rpi-kitchen' },
   }),
+  pulseaudio: fpl.apps.pulseaudio.new({
+    node_selector: { 'kubernetes.io/hostname': 'rpi-kitchen' },
+  }),
 };
 
 local monitoring = fpl.stacks.monitoring {
@@ -135,22 +138,27 @@ local monitoring = fpl.stacks.monitoring {
     },
     grafana+: {
       external_domain: 'grafana.' + domain,
-    },
-    grafana_config: {
-      sections: {
-        server: {
-          root_url: 'https://' + $._config.grafana.external_domain,
-        },
-        'auth.github': {
-          enabled: true,
-          allow_sign_up: true,
-          client_id: '7fb952e1283dff23be79',
-          client_secret: std.extVar('monitoring_grafana_oauth_client_secret'),
-          scopes: 'user:email,read:org',
-          auth_url: 'https://github.com/login/oauth/authorize',
-          token_url: 'https://github.com/login/oauth/access_token',
-          api_url: 'https://api.github.com/user',
-          allowed_organizations: '5pi-home',
+      dashboards+: {
+        'minecraft-server.json': (import 'files/grafana-dashboards/minecraft-server-dashboard.json'),
+        'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
+        'smokeping.json': (import 'files/grafana-dashboards/smokeping.json'),
+      },
+      config: {
+        sections: {
+          server: {
+            root_url: 'https://' + $._config.grafana.external_domain,
+          },
+          'auth.github': {
+            enabled: true,
+            allow_sign_up: true,
+            client_id: '7fb952e1283dff23be79',
+            client_secret: std.extVar('monitoring_grafana_oauth_client_secret'),
+            scopes: 'user:email,read:org',
+            auth_url: 'https://github.com/login/oauth/authorize',
+            token_url: 'https://github.com/login/oauth/access_token',
+            api_url: 'https://api.github.com/user',
+            allowed_organizations: '5pi-home',
+          },
         },
       },
     },
@@ -184,9 +192,7 @@ local monitoring = fpl.stacks.monitoring {
     _config+:: {
       grafana+:: {
         dashboards+:: {
-          'minecraft-server.json': (import 'files/grafana-dashboards/minecraft-server-dashboard.json'),
-          'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
-          'smokeping.json': (import 'files/grafana-dashboards/smokeping.json'),
+
         },
       },
     },
