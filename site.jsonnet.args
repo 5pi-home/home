@@ -9,5 +9,6 @@
 --ext-str registry_password=$(pass home/image-registry/default)
 --ext-str "k8s_webhook_handler_webhook_secret=$(pass k8s-webhook-handler-secret)"
 --ext-str "k8s_webhook_handler_github_token=$(pass github/k8s-webhook-handler-token)"
+--ext-str "media_nzbgeek_rss_feed=$(pass home/usenet/nzbgeek-rss-url)"
 --ext-str fpl_local=${FPL_LOCAL:-true}
 --ext-str include_images=true

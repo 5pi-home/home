@@ -3,11 +3,6 @@ local k = import 'k.libsonnet';
 local domain = 'd.42o.de';
 local image_registry = 'registry.' + domain;
 local version = std.extVar('version');
-local jb_dep_sums = {
-  [dep.source.git.remote]: dep.sum
-
-  for dep in std.extVar('jsonnetfile_lock').dependencies
-};
 
 local fplibs = {
   release: import 'github.com/5pi/jsonnet-libs/main.libsonnet',
@@ -45,15 +40,27 @@ local media = fpl.stacks.media {
     storage_class: 'zfs-stripe-ssd',
     media_path: '/pool-mirror-hdd/media',
 
-    usenet: {
-      server1_username: std.extVar('media_server1_username'),
-      server1_password: std.extVar('media_server1_password'),
-    },
-
     timezone: 'Europe/Berlin',
     plex_env: [{ name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') }],
     nzbget+: {
       image: image_registry + '/nzbget:' + std.md5(std.manifestJsonEx($.nzbget.image.spec.containerfile, '  ')),
+      config: |||
+        Server1.Active=yes
+        Server1.Name=news.eweka.nl
+        Server1.Host=news.eweka.nl
+        Server1.Port=563
+        Server1.Username=%(server1_username)s
+        Server1.Password=%(server1_password)s
+        Server1.Encryption=yes
+        Server1.Cipher=ECDHE-RSA-AES256-GCM-SHA384
+        Server1.Connections=20
+        Feed1.Name=nzbgeek
+        Feed1.URL=%(rss_feed)s
+      ||| % {
+      server1_username: std.extVar('media_server1_username'),
+      server1_password: std.extVar('media_server1_password'),
+      rss_feed: std.extVar('media_nzbgeek_rss_feed'),
+      },
     },
     sonarr+: {
       image: image_registry + '/sonarr:' + std.md5(std.manifestJsonEx($.sonarr.image.spec.containerfile, '  ')),
@@ -255,7 +262,7 @@ local minecraft_config = {
 local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraft/main.jsonnet').new(
   minecraft_config {
     image: image_registry + '/minecraft:' + std.md5(
-      std.manifestJsonEx(minecraft_config { jb_sum: jb_dep_sums['https://github.com/discordianfish/minecraft.git'] }, ' ')
+      std.manifestJsonEx(minecraft_config { jb_sum: 'FIXME' }, ' ')
     ),
   }
 );
