@@ -56,10 +56,11 @@ local media = fpl.stacks.media {
         Server1.Connections=20
         Feed1.Name=nzbgeek
         Feed1.URL=%(rss_feed)s
+        HealthCheck=delete
       ||| % {
-      server1_username: std.extVar('media_server1_username'),
-      server1_password: std.extVar('media_server1_password'),
-      rss_feed: std.extVar('media_nzbgeek_rss_feed'),
+        server1_username: std.extVar('media_server1_username'),
+        server1_password: std.extVar('media_server1_password'),
+        rss_feed: std.extVar('media_nzbgeek_rss_feed'),
       },
     },
     sonarr+: {
@@ -490,6 +491,20 @@ local manifests = fpl.lib.site.build({
         },
       ],
     }),
+    minio: fpl.apps.minio.new({
+      namespace: 'data',
+      host: 'minio.' + domain,
+      data_path: '/pool-mirror-hdd/minio',
+      node_selector: { 'kubernetes.io/hostname': 'filer' },
+      uid: 1003, // minio
+      args: ['server', '/data/minio'],
+    })  + cert_manager.withCertManagerTLS(tls_issuer) + {
+      ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin(
+        {
+          'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+        },
+      ),
+    }
   },
 });
 
