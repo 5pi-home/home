@@ -98,7 +98,7 @@ local monitoring = fpl.stacks.monitoring {
           {
             job_name: 'mouldy',
             static_configs: [{
-              targets: ['n-office', 'n-bedroom', 'n-living'],
+              targets: ['n-office', 'n-bedroom', 'n-garden'],
             }],
           },
           {
@@ -166,6 +166,9 @@ local monitoring = fpl.stacks.monitoring {
             token_url: 'https://github.com/login/oauth/access_token',
             api_url: 'https://api.github.com/user',
             allowed_organizations: '5pi-home',
+          },
+          users: {
+            viewers_can_edit: true,
           },
         },
       },
@@ -496,15 +499,15 @@ local manifests = fpl.lib.site.build({
       host: 'minio.' + domain,
       data_path: '/pool-mirror-hdd/minio',
       node_selector: { 'kubernetes.io/hostname': 'filer' },
-      uid: 1003, // minio
+      uid: 1003,  // minio
       args: ['server', '/data/minio'],
-    })  + cert_manager.withCertManagerTLS(tls_issuer) + {
+    }) + cert_manager.withCertManagerTLS(tls_issuer) + {
       ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin(
         {
           'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
         },
       ),
-    }
+    },
   },
 });
 
