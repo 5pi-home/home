@@ -22,8 +22,8 @@ spec:
           - key: .dockerconfigjson
             path: config.json
     - name: podman-local
-      hostPath:
-        path: /tmp/podman-containers
+      persistentVolumeClaim:
+        claimName: podman
     - name: tls-certs
       hostPath:
         path: /etc/ssl/certs
