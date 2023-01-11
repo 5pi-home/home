@@ -1,0 +1,10 @@
+{
+    "jsonnet.libPaths": [
+        "vendor"
+    ],
+    "jsonnet.extStrs": {
+        "fpl_local": "true",
+        "include_images": "false",
+        "domain": "int.42o.de"
+    }
+}
