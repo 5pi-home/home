@@ -62,10 +62,12 @@ fpl.stacks.monitoring {
     },
     grafana+: {
       external_domain: 'grafana.' + $._config.domain,
+      version: '9.3.2',
       dashboards+: {
         'minecraft-server.json': (import 'files/grafana-dashboards/minecraft-server-dashboard.json'),
         'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
         'smokeping.json': (import 'files/grafana-dashboards/smokeping.json'),
+        'garden.json': (import 'files/grafana-dashboards/garden.json'),
       },
       config: {
         sections: {
