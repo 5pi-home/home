@@ -107,6 +107,29 @@ local manifests = fpl.lib.site.build({
                k.core.v1.service.spec.withType('ExternalName') +
                k.core.v1.service.spec.withExternalName('localhost'),
     },
+    cam: {
+      _port:: 443,
+      ingress_rule:: k.networking.v1.ingressRule.withHost('cam.' + domain) +
+                     k.networking.v1.ingressRule.http.withPaths([
+                       k.networking.v1.httpIngressPath.withPath('/') +
+                       k.networking.v1.httpIngressPath.withPathType('Prefix') +
+                       k.networking.v1.httpIngressPath.backend.service.withName(self.service.metadata.name) +
+                       k.networking.v1.httpIngressPath.backend.service.port.withNumber(self._port),
+                     ]),
+      ingress: k.networking.v1.ingress.new('cam') +
+               k.networking.v1.ingress.metadata.withNamespace(self.service.metadata.namespace) +
+               k.networking.v1.ingress.spec.withRules([self.ingress_rule]) +
+               k.networking.v1.ingress.metadata.withAnnotationsMixin({
+                 'nginx.ingress.kubernetes.io/backend-protocol': 'HTTPS',
+                 'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+               }) +
+               cert_manager.ingressCertManagerTLSMixin(self.ingress_rule.host, tls_issuer),
+
+      service: k.core.v1.service.new('cam', {}, k.core.v1.servicePort.new(self._port, self._port)) +
+               k.core.v1.service.metadata.withNamespace('kube-system') +
+               k.core.v1.service.spec.withType('ExternalName') +
+               k.core.v1.service.spec.withExternalName('dafang'),
+    },
     'fuse-device-plugin': fpl.apps.fuse_device_plugin.new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
     }),
