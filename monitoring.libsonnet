@@ -53,6 +53,26 @@ fpl.stacks.monitoring {
               replacement: 'blackbox-exporter:9115',
             }],
           },
+          {
+            job_name: 'prosafe-exporter',
+            metrics_path: '/probe',
+            static_configs: [{
+              targets: [
+                'sw-core:*',
+                'sw-office:*',
+              ],
+            }],
+            relabel_configs: [{
+              source_labels: ['__address__'],
+              target_label: '__param_target',
+            }, {
+              source_labels: ['__param_target'],
+              target_label: 'instance',
+            }, {
+              target_label: '__address__',
+              replacement: 'prosafe-exporter:9493',
+            }],
+          },
         ],
       },
 
@@ -68,6 +88,7 @@ fpl.stacks.monitoring {
         'minecraft-players.json': (import 'files/grafana-dashboards/minecraft-players-dashboard.json'),
         'smokeping.json': (import 'files/grafana-dashboards/smokeping.json'),
         'garden.json': (import 'files/grafana-dashboards/garden.json'),
+        'prosafe.json': (import 'files/grafana-dashboards/prosafe.json'),
       },
       config: {
         sections: {
@@ -146,4 +167,8 @@ fpl.stacks.monitoring {
                  k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9374' }),
 
   },
+
+  prosafe_exporter: fpl.apps.prosafe_exporter.new({
+    node_selector: { 'kubernetes.io/arch': 'amd64' },
+  }),
 }
