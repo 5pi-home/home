@@ -1,13 +1,13 @@
-local k = import 'k.libsonnet';
 local fpl = import 'fpl.libsonnet';
+local k = import 'k.libsonnet';
 local cert_manager = fpl.apps.cert_manager;
 
 local domain = 'd.42o.de';
 local image_registry = 'registry.' + domain;
 local tls_issuer = 'letsencrypt-production';
 
-local minecraft_version = '1.18.1';
-local papermc_build = '197';
+local minecraft_version = '1.19.4';
+local papermc_build = '519';
 
 local minecraft_config = {
   papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/' + minecraft_version + '/builds/' + papermc_build + '/downloads/paper-' + minecraft_version + '-' + papermc_build + '.jar',
@@ -18,6 +18,7 @@ local minecraft_config = {
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/geyser.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/dynmap.jsonnet'),
     (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/prometheus_exporter.jsonnet'),
+    (import 'github.com/discordianfish/minecraft/apps/minecraft/plugins/skinsrestorer.jsonnet'),
   ],
   memory_limit_mb: 4 * 1024,
   build_job: true,
@@ -32,15 +33,15 @@ local minecraft_app = (import 'github.com/discordianfish/minecraft/apps/minecraf
 );
 
 minecraft_app.manifests {
-                    container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
-                    deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft') +
-                                 k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9225' }),
-                    podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
-                                       k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
-                  } +
-                  fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
-                  fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
-                  cert_manager.withCertManagerTLS(tls_issuer) + {
+  container+: k.core.v1.container.resources.withRequests({ memory: minecraft_config.memory_limit_mb + 'M' }),
+  deployment+: k.apps.v1.deployment.metadata.withNamespace('minecraft') +
+               k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9225' }),
+  podman_build_job+: k.batch.v1.job.metadata.withNamespace('minecraft') +
+                     k.batch.v1.job.spec.template.spec.withNodeSelector({ 'kubernetes.io/hostname': 'filer' }),
+} +
+fpl.lib.app.withPVC('minecraft', '50G', '/data', 'zfs-stripe-ssd') +
+fpl.lib.app.withWeb('minecraft.' + domain, 8123) +
+cert_manager.withCertManagerTLS(tls_issuer) + {
   ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
     'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
   }),
