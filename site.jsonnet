@@ -58,10 +58,19 @@ local home_automation = fpl.stacks['home-automation'] {
 };
 
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
-  host_mode: false,
+  host_mode: true,
   node_selector: { 'kubernetes.io/hostname': 'openwrt' },
 });
 
+local portmappings = {
+  tcp: {
+    '25565': 'minecraft/minecraft:25565',
+  },
+  udp: {
+    '25565': 'minecraft/minecraft:25565',
+    '19132': 'minecraft/minecraft:19132',
+  },
+};
 
 local manifests = fpl.lib.site.build({
   cluster_scope: {
@@ -165,14 +174,26 @@ local manifests = fpl.lib.site.build({
           k.core.v1.container.withArgs(container.args + ['--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services', '--udp-services-configmap=$(POD_NAMESPACE)/udp-services', '--watch-ingress-without-class']),
         ]
       ),
-      'tcp-services-configmap': k.core.v1.configMap.new('tcp-services', { '25565': 'minecraft/minecraft:25565' }) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
-      'udp-services-configmap': k.core.v1.configMap.new('udp-services', { '19132': 'minecraft/minecraft:19132' }) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
+      'tcp-services-configmap': k.core.v1.configMap.new('tcp-services', portmappings.tcp) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
+      'udp-services-configmap': k.core.v1.configMap.new('udp-services', portmappings.udp) + k.core.v1.configMap.metadata.withNamespace(ingress_nginx['ingress-nginx-controller-deployment'].metadata.namespace),
       'ingress-nginx-controller-configmap'+: {
         data: {
           'global-auth-url': 'https://oauth2-proxy.' + domain + '/oauth2/auth',
           'global-auth-signin': 'https://oauth2-proxy.' + domain + '/start?rd=$scheme://$host$request_uri',
         },
       },
+      'ingress-nginx-controller-service'+: k.core.v1.service.spec.withPortsMixin(
+        [
+          local port = std.parseInt(p);
+          k.core.v1.servicePort.newNamed(p, port, port)
+          for p in std.objectFields(portmappings.tcp)
+        ] + [
+          local port = std.parseInt(p);
+          k.core.v1.servicePort.newNamed(p + '-udp', port, port) +
+          k.core.v1.servicePort.withProtocol('UDP')
+          for p in std.objectFields(portmappings.udp)
+        ],
+      ),
     },
     oauth2_proxy: fpl.apps.oauth2_proxy.new({
       namespace: 'ingress-nginx',
@@ -271,6 +292,15 @@ local manifests = fpl.lib.site.build({
       ),
     },
   },
+  /*
+  web: {
+    gotosocial: fpl.apps.gotosocial.new({
+      host: 'gotosocial.' + domain,
+      namespace: 'web',
+      storage_class: 'zfs-mirror',
+    }) + cert_manager.withCertManagerTLS(tls_issuer),
+  },
+  */
 });
 
 local namespaces = std.uniq(std.sort([
