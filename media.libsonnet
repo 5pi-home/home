@@ -7,9 +7,10 @@ fpl.stacks.media {
     media_path: '/pool-mirror-hdd/media',
 
     timezone: 'Europe/Berlin',
-    plex_env: [{ name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') }],
+    plex_env: [
+      { name: 'PLEX_CLAIM', value: std.extVar('media_plex_claim_token') },
+    ],
     nzbget+: {
-      image: $._config.image_registry + '/nzbget:' + std.md5(std.manifestJsonEx($.nzbget.image.spec.containerfile, '  ')),
       config: |||
         Server1.Active=yes
         Server1.Name=news.eweka.nl
@@ -28,12 +29,6 @@ fpl.stacks.media {
         server1_password: std.extVar('media_server1_password'),
         rss_feed: std.extVar('media_nzbgeek_rss_feed'),
       },
-    },
-    sonarr+: {
-      image: $._config.image_registry + '/sonarr:' + std.md5(std.manifestJsonEx($.sonarr.image.spec.containerfile, '  ')),
-    },
-    radarr+: {
-      image: $._config.image_registry + '/radarr:' + std.md5(std.manifestJsonEx($.radarr.image.spec.containerfile, '  ')),
     },
   },
   nzbget+: cert_manager.withCertManagerTLS($._config.tls_issuer),

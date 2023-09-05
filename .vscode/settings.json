@@ -6,5 +6,6 @@
         "fpl_local": "true",
         "include_images": "false",
         "domain": "int.42o.de"
-    }
+    },
+    "editor.formatOnSave": true
 }

@@ -51,15 +51,14 @@ local home_automation = fpl.stacks['home-automation'] {
   _config+: {
     domain: domain,
     node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
-    mqtt_node_selector: { 'kubernetes.io/hostname': 'openwrt' },
   },
   home_assistant+: cert_manager.withCertManagerTLS(tls_issuer),
   zwave2mqtt+: cert_manager.withCertManagerTLS(tls_issuer),
+  mqtt+:: super.mqtt,
 };
-
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
-  host_mode: true,
-  node_selector: { 'kubernetes.io/hostname': 'openwrt' },
+  service_type: 'LoadBalancer',
+  node_selector: { 'kubernetes.io/hostname': 'filer' },
 });
 
 local portmappings = {
@@ -152,17 +151,6 @@ local manifests = fpl.lib.site.build({
         'nginx.ingress.kubernetes.io/proxy-body-size': '0',
       }),
     } + cert_manager.withCertManagerTLS(tls_issuer),
-    imagecontroller: fpl.apps.k8s_image_controller.new({
-      namespace: 'kube-system',
-      image_ref: 'caa47c5b000c7c2b80b944d982a6ba067bf949a5',
-      image_registry: image_registry,
-      image_tag: std.md5(std.manifestJsonEx($['kube-system'].imagecontroller.image.spec.containerfile, '  ')),
-    }) + {
-      serviceaccount+: k.core.v1.serviceAccount.withImagePullSecrets([{ name: 'image-pull-secret' }]),
-      deployment+: k.apps.v1.deployment.spec.template.spec.withNodeSelector({
-        'kubernetes.io/arch': 'amd64',
-      }),
-    },
   },
   zfs: zfs,
   ingress: {

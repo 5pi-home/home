@@ -113,31 +113,12 @@ fpl.stacks.monitoring {
       },
     },
   },
-  prometheus+: {
-    container+: {
-      volumeMounts+: [
-        k.core.v1.volumeMount.new('kubelet-pluto-ca', '/etc/prometheus/pluto-kubelet-ca'),
-        k.core.v1.volumeMount.new('kubelet-pluto', '/etc/prometheus/pluto-kubelet'),
-      ],
-    },
-    deployment+: {
-      spec+: {
-        template+: {
-          spec+: {
-            volumes+: [
-              k.core.v1.volume.fromConfigMap('kubelet-pluto-ca', 'kubelet-pluto-ca'),
-              k.core.v1.volume.fromSecret('kubelet-pluto', 'kubelet-pluto'),
-            ],
-          },
-        },
-      },
-    },
-  } + cert_manager.withCertManagerTLS($._config.tls_issuer),
   grafana+: {
     ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
       'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
     }) + cert_manager.ingressCertManagerTLSMixin($._config.grafana.external_domain, $._config.tls_issuer),
   },
+  prometheus+: cert_manager.withCertManagerTLS($._config.tls_issuer),
   _grafana+:: {
     _config+:: {
       grafana+:: {
