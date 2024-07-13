@@ -6,8 +6,8 @@ local domain = 'd.42o.de';
 local image_registry = 'registry.' + domain;
 local tls_issuer = 'letsencrypt-production';
 
-local minecraft_version = '1.19.4';
-local papermc_build = '519';
+local minecraft_version = '1.20.1';
+local papermc_build = '196';
 
 local minecraft_config = {
   papermc_url: 'https://papermc.io/api/v2/projects/paper/versions/' + minecraft_version + '/builds/' + papermc_build + '/downloads/paper-' + minecraft_version + '-' + papermc_build + '.jar',

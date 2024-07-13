@@ -113,7 +113,7 @@ local manifests = fpl.lib.site.build({
       service: k.core.v1.service.new('openwrt', {}, k.core.v1.servicePort.new(self._port, self._port)) +
                k.core.v1.service.metadata.withNamespace('kube-system') +
                k.core.v1.service.spec.withType('ExternalName') +
-               k.core.v1.service.spec.withExternalName('localhost'),
+               k.core.v1.service.spec.withExternalName('192.168.1.1'),
     },
     cam: {
       _port:: 443,
