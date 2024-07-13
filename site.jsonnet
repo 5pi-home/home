@@ -89,13 +89,6 @@ local manifests = fpl.lib.site.build({
     },
   },
   'kube-system': {
-    coredns: {
-      configmap:
-        k.core.v1.configMap.new(
-          'coredns', { Corefile: importstr 'files/Corefile' }
-        ) +
-        k.core.v1.configMap.metadata.withNamespace('kube-system'),
-    },
     openwrt: {
       _port:: 5080,
       ingress_rule:: k.networking.v1.ingressRule.withHost('openwrt.' + domain) +
