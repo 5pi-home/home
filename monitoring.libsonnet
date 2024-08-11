@@ -8,7 +8,7 @@ fpl.stacks.monitoring {
     prometheus+: {
       host: 'prometheus.' + $._config.domain,
       storage_class: 'zfs-stripe-ssd',
-      storage_size: '10G',
+      storage_size: '15G',
       prometheus_config+: {
         scrape_configs+: [
           {
@@ -152,4 +152,24 @@ fpl.stacks.monitoring {
   prosafe_exporter: fpl.apps.prosafe_exporter.new({
     node_selector: { 'kubernetes.io/arch': 'amd64' },
   }),
+
+  ssh_tunnel: fpl.lib.app.newWebApp('ssh-tunnel', 'kroniak/ssh-client:3.19', 'ssh-tunnel.' + $._config.domain, 9100, namespace="monitoring") + {
+    secret: k.core.v1.secret.new('ssh-tunnel', {
+      'id_rsa': std.base64(std.extVar('monitoring_ssh_tunnel_id_rsa') + '\n'),
+      'known_hosts': std.base64(std.extVar('monitoring_ssh_tunnel_known_hosts') + '\n'),
+    }) + k.core.v1.secret.metadata.withNamespace('monitoring'),
+    deployment+: k.apps.v1.deployment.spec.template.spec.withNodeSelector({ 'kubernetes.io/arch': 'amd64' }),
+    container+: k.core.v1.container.withCommand(['ssh', '-N', '-T', '-L0.0.0.0:9100:localhost:9100', 'fish@52.117.41.204']),
+    service+: k.core.v1.service.metadata.withAnnotationsMixin({
+      'prometheus.io/scrape': 'true',
+      'prometheus.io/port': '9100',
+    }) +
+    k.core.v1.service.metadata.withLabels({
+      'job': 'node',
+    }),
+  } + fpl.lib.app.withVolumeMixin(
+      k.core.v1.volume.fromSecret('ssh-tunnel', 'ssh-tunnel') +
+      k.core.v1.volume.secret.withDefaultMode(std.parseOctal('0600')),
+      '/root/.ssh'
+    )
 }

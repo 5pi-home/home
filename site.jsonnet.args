@@ -12,3 +12,5 @@
 --ext-str "media_nzbgeek_rss_feed=$(pass home/usenet/nzbgeek-rss-url)"
 --ext-str fpl_local=${FPL_LOCAL:-true}
 --ext-str include_images=true
+--ext-str "monitoring_ssh_tunnel_id_rsa=$(pass home/ssh-tunnel/id_rsa)"
+--ext-str "monitoring_ssh_tunnel_known_hosts=$(pass home/ssh-tunnel/known_hosts)"
