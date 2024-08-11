@@ -30,6 +30,9 @@ fpl.stacks.media {
         rss_feed: std.extVar('media_nzbgeek_rss_feed'),
       },
     },
+    sonarr+: {
+       storage_size: "1Gi",
+    },
   },
   nzbget+: cert_manager.withCertManagerTLS($._config.tls_issuer),
   radarr+: cert_manager.withCertManagerTLS($._config.tls_issuer),
