@@ -24,6 +24,8 @@ fpl.stacks.media {
         Feed1.Name=nzbgeek
         Feed1.URL=%(rss_feed)s
         HealthCheck=delete
+        Category5.Name=XXX
+        Category5.DestDir=/media/porn
       ||| % {
         server1_username: std.extVar('media_server1_username'),
         server1_password: std.extVar('media_server1_password'),

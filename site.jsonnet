@@ -50,12 +50,27 @@ local zfs = fpl.stacks.zfs {
 local home_automation = fpl.stacks['home-automation'] {
   _config+: {
     domain: domain,
-    node_selector: { 'kubernetes.io/hostname': 'rpi-living' },
+    mqtt_passwd: std.extVar('mqtt_passwd'),
   },
-  home_assistant+: cert_manager.withCertManagerTLS(tls_issuer),
+  home_assistant+: cert_manager.withCertManagerTLS(tls_issuer) + {
+    ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
+      'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+    }),
+    deployment+: k.apps.v1.deployment.spec.template.spec.dnsConfig.withOptions({
+      name: 'ndots',
+      value: '1',
+    }),
+  },
   zwave2mqtt+: cert_manager.withCertManagerTLS(tls_issuer),
-  mqtt+:: super.mqtt,
+} + {
+  'zigbee2mqtt': fpl.apps.zigbee2mqtt.new({
+    namespace: 'home-automation',
+    host: 'zigbee.' + domain,
+    zigbee_dev: '/dev/ttyUSB0', // '/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_a8cadaff5412ef11b6466fb8bf9df066-if00-port0',
+    storage_class: 'zfs-stripe-ssd',
+  }) + cert_manager.withCertManagerTLS(tls_issuer),
 };
+
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
   service_type: 'LoadBalancer',
   node_selector: { 'kubernetes.io/hostname': 'filer' },
@@ -163,7 +178,10 @@ local manifests = fpl.lib.site.build({
           'global-auth-signin': 'https://oauth2-proxy.' + domain + '/start?rd=$scheme://$host$request_uri',
         },
       },
-      'ingress-nginx-controller-service'+: k.core.v1.service.spec.withPortsMixin(
+      'ingress-nginx-controller-service'+:
+        k.core.v1.service.spec.withIpFamilyPolicy('PreferDualStack') +
+        k.core.v1.service.spec.withIpFamilies(['IPv4', 'IPv6']) +
+        k.core.v1.service.spec.withPortsMixin(
         [
           local port = std.parseInt(p);
           k.core.v1.servicePort.newNamed(p, port, port)

@@ -62,7 +62,7 @@
           "subdir": ""
         }
       },
-      "version": "release-0.6"
+      "version": "master"
     },
     {
       "source": {
@@ -71,7 +71,7 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "master"
+      "version": "main"
     },
     {
       "source": {
@@ -80,7 +80,7 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "master"
+      "version": "add-aix-support"
     }
   ],
   "legacyImports": true

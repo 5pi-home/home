@@ -8,8 +8,8 @@
           "subdir": ""
         }
       },
-      "version": "3258be5e32b4e5b44e12d02541a0e7949ab1a719",
-      "sum": "85/5/lzWMBmzAHydaCIQcPkzu4rMaQhWiSO5sB4UUKM="
+      "version": "32a5a6f71277502e367da3c0ccadf6675fd42aa5",
+      "sum": "Cbzp6hy3Zdx1fRtqyV+aT4T2x/+qbqo44+8GuOhye1A="
     },
     {
       "source": {
@@ -48,7 +48,7 @@
           "subdir": "grafonnet"
         }
       },
-      "version": "30280196507e0fe6fa978a3e0eaca3a62844f817",
+      "version": "a1d61cce1da59c71409b99b5c7568511fec661ea",
       "sum": "342u++/7rViR/zj2jeJOjshzglkZ1SY+hFNuyCBFMdc="
     },
     {
@@ -58,8 +58,28 @@
           "subdir": "grafonnet-7.0"
         }
       },
-      "version": "30280196507e0fe6fa978a3e0eaca3a62844f817",
+      "version": "a1d61cce1da59c71409b99b5c7568511fec661ea",
       "sum": "gCtR9s/4D5fxU9aKXg0Bru+/njZhA0YjLjPiASc61FM="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/grafonnet.git",
+          "subdir": "gen/grafonnet-latest"
+        }
+      },
+      "version": "733beadbc8dab55c5fe1bcdcf0d8a2d215759a55",
+      "sum": "eyuJ0jOXeA4MrobbNgU4/v5a7ASDHslHZ0eS6hDdWoI="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/grafonnet.git",
+          "subdir": "gen/grafonnet-v11.0.0"
+        }
+      },
+      "version": "733beadbc8dab55c5fe1bcdcf0d8a2d215759a55",
+      "sum": "0BvzR0i4bS4hc2O3xDv6i9m52z7mPrjvqxtcPrGhynA="
     },
     {
       "source": {
@@ -68,18 +88,18 @@
           "subdir": ""
         }
       },
-      "version": "2c06399b18ea6d31e61cab450c1a6ef9879a08b8",
-      "sum": "6r++VKHuz2pQWKdPZfuo3zEOgZAi///D1gaicNiOUW4="
+      "version": "52be87fb93edc439b69b550acb893abb51a079c5",
+      "sum": "RLTslufEA/1YQrKY8DWd++giRHQp/hTkq6hTorylC8Q="
     },
     {
       "source": {
         "git": {
-          "remote": "https://github.com/grafana/jsonnet-libs.git",
-          "subdir": "grafana-builder"
+          "remote": "https://github.com/jsonnet-libs/docsonnet.git",
+          "subdir": "doc-util"
         }
       },
-      "version": "2c06399b18ea6d31e61cab450c1a6ef9879a08b8",
-      "sum": "tDR6yT2GVfw0wTU12iZH+m01HrbIr6g/xN+/8nzNkU0="
+      "version": "6ac6c69685b8c29c54515448eaca583da2d88150",
+      "sum": "BrAL/k23jq+xy9oA7TWIhUx07dsA/QLm3g7ktCwe//U="
     },
     {
       "source": {
@@ -104,12 +124,22 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/jsonnet-libs/xtd.git",
+          "subdir": ""
+        }
+      },
+      "version": "63d430b69a95741061c2f7fc9d84b1a778511d9c",
+      "sum": "qiZi3axUSXCVzKUF83zSAxklwrnitMmrDK4XAfjPMdE="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin.git",
           "subdir": ""
         }
       },
-      "version": "1941868d86a7c37e5505a14e3d567bda90e80357",
-      "sum": "ypWxhZVFWF53k7qIkSpUvnI6IGyFBNKmgrzjNtLwMIM="
+      "version": "50150c585ebee6e4d9cb72218182da8f3c616515",
+      "sum": "0g1pn3gGq2yZyeUTx+zniK/D7jMKbAnqJ83Lke+uJ6o="
     },
     {
       "source": {
@@ -118,8 +148,8 @@
           "subdir": "jsonnet/kube-state-metrics"
         }
       },
-      "version": "12402a564cbf4557763079ab8e6e995d9afb4db9",
-      "sum": "evJ+PXRzuM1tezCG5WzpAn4Lk3YJfMvDFcs+45fsscU="
+      "version": "db01d3eb023c0e0d7d727c1f91f241b256d9a7f3",
+      "sum": "lO7jUSzAIy8Yk9pOWJIWgPRhubkWzVh56W6wtYfbVH4="
     },
     {
       "source": {
@@ -128,8 +158,8 @@
           "subdir": "docs/node-mixin"
         }
       },
-      "version": "d9b2634324aa93a4b680f732359185eb02528ab7",
-      "sum": "tappaHscNBSJCA6ypSWt7DDhohIOkxNjcLFRb3WKpu4="
+      "version": "2c12e3cc86013d2b5b0efe2a3ebc19c050ba1f5e",
+      "sum": "cQCW+1N0Xae5yXecCWDK2oAlN0luBS/5GrwBYSlaFms="
     }
   ],
   "legacyImports": false
