@@ -15,3 +15,4 @@
 --ext-str "monitoring_ssh_tunnel_id_rsa=$(pass home/ssh-tunnel/id_rsa)"
 --ext-str "monitoring_ssh_tunnel_known_hosts=$(pass home/ssh-tunnel/known_hosts)"
 --ext-str "mqtt_passwd=$(pass home/mqtt/passwd)"
+--ext-str "minio_passwd=$(pass home/minio/admin)"

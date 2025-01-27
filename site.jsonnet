@@ -289,6 +289,10 @@ local manifests = fpl.lib.site.build({
           'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
         },
       ),
+      container+: k.core.v1.container.withEnvMap({
+        'MINIO_ROOT_USER': 'admin',
+        'MINIO_ROOT_PASSWORD': std.extVar('minio_passwd'),
+      }),
     },
   },
   /*
