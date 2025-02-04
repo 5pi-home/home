@@ -287,6 +287,7 @@ local manifests = fpl.lib.site.build({
       ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin(
         {
           'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+          'nginx.ingress.kubernetes.io/proxy-body-size': '0',
         },
       ),
       container+: k.core.v1.container.withEnvMap({
