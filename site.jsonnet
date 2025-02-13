@@ -47,12 +47,19 @@ local zfs = fpl.stacks.zfs {
   },
 };
 
-local home_automation = fpl.stacks['home-automation'] {
-  _config+: {
-    domain: domain,
-    mqtt_passwd: std.extVar('mqtt_passwd'),
-  },
-  home_assistant+: cert_manager.withCertManagerTLS(tls_issuer) + {
+local home_automation = {
+  mqtt: fpl.apps.mqtt.new({
+    storage_path: '/data/mqtt',
+    passwd: std.extVar('mqtt_passwd'),
+  }),
+
+  zwave2mqtt: fpl.apps.zwave2mqtt.new({
+    host: 'zwave.' + domain,
+  }) + cert_manager.withCertManagerTLS(tls_issuer),
+
+  home_assistant: fpl.apps.home_assistant.new({
+    host: 'home.' + domain,
+  }) + cert_manager.withCertManagerTLS(tls_issuer) + {
     ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
       'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
     }),
@@ -61,8 +68,7 @@ local home_automation = fpl.stacks['home-automation'] {
       value: '1',
     }),
   },
-  zwave2mqtt+: cert_manager.withCertManagerTLS(tls_issuer),
-} + {
+
   'zigbee2mqtt': fpl.apps.zigbee2mqtt.new({
     namespace: 'home-automation',
     host: 'zigbee.' + domain,
