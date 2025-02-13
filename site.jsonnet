@@ -53,12 +53,23 @@ local home_automation = {
     passwd: std.extVar('mqtt_passwd'),
   }),
 
-  zwave2mqtt: fpl.apps.zwave2mqtt.new({
+  zwave_js_ui: fpl.apps.zwave_js_ui.new({
     host: 'zwave.' + domain,
-  }) + cert_manager.withCertManagerTLS(tls_issuer),
+    node_selector: { 'kubernetes.io/hostname': 'filer' },
+  }) + cert_manager.withCertManagerTLS(tls_issuer) + {
+    deployment+: k.apps.v1.deployment.spec.template.spec.dnsConfig.withOptions({
+      name: 'ndots',
+      value: '1',
+    }),
+    service+: k.core.v1.service.spec.withPortsMixin([
+      k.core.v1.servicePort.newNamed('ws', 3000, 3000),
+    ]),
+  },
 
   home_assistant: fpl.apps.home_assistant.new({
     host: 'home.' + domain,
+    namespace: 'home-automation',
+    node_selector: { 'kubernetes.io/hostname': 'filer' },
   }) + cert_manager.withCertManagerTLS(tls_issuer) + {
     ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
       'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
@@ -261,27 +272,27 @@ local manifests = fpl.lib.site.build({
   },
   ci: (import 'ci.libsonnet') + { _config:: { domain: domain, tls_issuer: tls_issuer } },
   data: {
-    rclone: fpl.apps.rclone.new({
-      namespace: 'data',
-      host: 'rclone.' + domain,
-      image: image_registry + '/rclone:' + std.md5(std.manifestJsonEx($.data.rclone.image.spec.containerfile, '  ')),
-      data_path: '/pool-mirror-hdd',
-      node_selector: { 'kubernetes.io/hostname': 'filer' },
-      uid: 1001,
-      args: ['--config', '/data/rclone/rclone.conf'],
-      jobs: [
-        {
-          name: 'gdrive-daily',
-          schedule: '15 4 * * *',
-          args: ['sync', 'GoogleDrive:/', '/data/GoogleDrive'],
-        },
-        {
-          name: 'gphotos-daily',
-          schedule: '15 4 * * *',
-          args: ['sync', 'GooglePhotos:/', '/data/GooglePhotos'],
-        },
-      ],
-    }),
+    // rclone: fpl.apps.rclone.new({
+    //   namespace: 'data',
+    //   host: 'rclone.' + domain,
+    //   image: image_registry + '/rclone:' + std.md5(std.manifestJsonEx($.data.rclone.image.spec.containerfile, '  ')),
+    //   data_path: '/pool-mirror-hdd',
+    //   node_selector: { 'kubernetes.io/hostname': 'filer' },
+    //   uid: 1001,
+    //   args: ['--config', '/data/rclone/rclone.conf'],
+    //   jobs: [
+    //     {
+    //       name: 'gdrive-daily',
+    //       schedule: '15 4 * * *',
+    //       args: ['sync', 'GoogleDrive:/', '/data/GoogleDrive'],
+    //     },
+    //     {
+    //       name: 'gphotos-daily',
+    //       schedule: '15 4 * * *',
+    //       args: ['sync', 'GooglePhotos:/', '/data/GooglePhotos'],
+    //     },
+    //   ],
+    // }),
     minio: fpl.apps.minio.new({
       namespace: 'data',
       host: 'minio.' + domain,
