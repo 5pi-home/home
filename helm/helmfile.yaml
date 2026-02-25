@@ -1,0 +1,35 @@
+repositories:
+  - name: go-vikunja
+    oci: true
+    url: ghcr.io/go-vikunja/helm-chart
+
+releases:
+  - name: vikunja
+    namespace: apps
+    chart: go-vikunja/vikunja
+    version: 2.0.0
+    values:
+      - vikunja:
+          ingress:
+            main:
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-production
+              hosts:
+                - host: vikunja.d.42o.de
+                  paths:
+                    - path: /
+              tls:
+                - secretName: vikunja.d.42o.de
+                  hosts:
+                    - vikunja.d.42o.de
+          configMaps:
+            config:
+              data:
+                config.yml: |
+                  service:
+                    publicurl: https://vikunja.d.42o.de
+          persistence:
+            data:
+              storageClass: pool-mirror-hdd
+            database:
+              storageClass: pool-mirror-hdd
