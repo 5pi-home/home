@@ -27,7 +27,7 @@ fpl.stacks.media {
         Server1.Password=%(server1_password)s
         Server1.Encryption=yes
         Server1.Cipher=ECDHE-RSA-AES256-GCM-SHA384
-        Server1.Connections=20
+        Server1.Connections=50
         Feed1.Name=nzbgeek
         Feed1.URL=%(rss_feed)s
         HealthCheck=delete
@@ -42,27 +42,12 @@ fpl.stacks.media {
     sonarr+: {
        storage_size: "1Gi",
     },
+    radarr+: {
+       storage_size: "1Gi",
+    },
   },
   nzbget+: cert_manager.withCertManagerTLS($._config.tls_issuer),
   radarr+: cert_manager.withCertManagerTLS($._config.tls_issuer),
   sonarr+: cert_manager.withCertManagerTLS($._config.tls_issuer),
   plex+: cert_manager.withCertManagerTLS($._config.tls_issuer),
-  spotifyd: fpl.apps.spotifyd.new({
-    image: 'docker.io/fish/spotifyd:v0.3.3',
-    node_selector: { 'kubernetes.io/hostname': 'rpi-media' },
-    gid: 29,  // audio
-  }),
-  shairport_sync: shairport_sync + {
-    'configmap': k.core.v1.configMap.new('shairport-sync', { 'shairport-sync.conf': importstr 'files/shairport-sync.conf' }) +
-      k.core.v1.configMap.metadata.withNamespace(shairport_sync['deployment'].metadata.namespace),
-  } + fpl.lib.app.withVolumeMountsMixin(
-    k.core.v1.volume.fromConfigMap('config', 'shairport-sync'),
-    [
-      k.core.v1.volumeMount.new('config', "/etc/shairport-sync.conf", true) +
-      k.core.v1.volumeMount.withSubPath('shairport-sync.conf'),
-    ]),
-
-  pulseaudio: fpl.apps.pulseaudio.new({
-    node_selector: { 'kubernetes.io/hostname': 'rpi-media' },
-  }),
 }
