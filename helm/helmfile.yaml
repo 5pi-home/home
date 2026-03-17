@@ -14,20 +14,21 @@ releases:
             main:
               annotations:
                 cert-manager.io/cluster-issuer: letsencrypt-production
+                nginx.ingress.kubernetes.io/enable-global-auth: "false"
               hosts:
-                - host: vikunja.d.42o.de
+                - host: todo.d.42o.de
                   paths:
                     - path: /
               tls:
-                - secretName: vikunja.d.42o.de
+                - secretName: todo.d.42o.de
                   hosts:
-                    - vikunja.d.42o.de
+                    - todo.d.42o.de
           configMaps:
             config:
               data:
                 config.yml: |
                   service:
-                    publicurl: https://vikunja.d.42o.de
+                    publicurl: https://todo.d.42o.de
           persistence:
             data:
               storageClass: pool-mirror-hdd
