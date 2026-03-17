@@ -270,7 +270,6 @@ local manifests = fpl.lib.site.build({
       },
     }),
   },
-  ci: (import 'ci.libsonnet') + { _config:: { domain: domain, tls_issuer: tls_issuer } },
   data: {
     // rclone: fpl.apps.rclone.new({
     //   namespace: 'data',
