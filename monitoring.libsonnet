@@ -143,7 +143,7 @@ fpl.stacks.monitoring {
     ),
   }) + {
     deployment+: k.apps.v1.deployment.spec.template.spec.withNodeSelector({
-                   'kubernetes.io/hostname': 'openwrt',
+                   'kubernetes.io/hostname': 'filer',
                  }) +
                  k.apps.v1.deployment.spec.template.metadata.withAnnotationsMixin({ 'prometheus.io/scrape': 'true', 'prometheus.io/port': '9374' }),
 
