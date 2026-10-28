@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zwave-js-ui
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  tls:
+    - hosts: [zwave.d.42o.de]
+      secretName: zwave.d.42o.de
+  rules:
+    - host: zwave.d.42o.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zwave-js-ui
+                port:
+                  number: 8091

@@ -1,0 +1,19 @@
+# LAN-only name, no TLS.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant-local
+  annotations:
+    nginx.ingress.kubernetes.io/enable-global-auth: "false"
+spec:
+  rules:
+    - host: home.dl.42o.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: home-assistant
+                port:
+                  number: 8123

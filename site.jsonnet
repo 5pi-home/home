@@ -48,61 +48,6 @@ local zfs = fpl.stacks.zfs {
   },
 };
 
-local home_automation = {
-  mqtt: fpl.apps.mqtt.new({
-    storage_path: '/data/mqtt',
-    passwd: std.extVar('mqtt_passwd'),
-  }),
-
-  zwave_js_ui: fpl.apps.zwave_js_ui.new({
-    host: 'zwave.' + domain,
-    node_selector: { 'kubernetes.io/hostname': 'filer' },
-  }) + cert_manager.withCertManagerTLS(tls_issuer) + {
-    deployment+: k.apps.v1.deployment.spec.template.spec.dnsConfig.withOptions({
-      name: 'ndots',
-      value: '1',
-    }),
-    service+: k.core.v1.service.spec.withPortsMixin([
-      k.core.v1.servicePort.newNamed('ws', 3000, 3000),
-    ]),
-  },
-
-  home_assistant: fpl.apps.home_assistant.new({
-    host: 'home.' + domain,
-    namespace: 'home-automation',
-    node_selector: { 'kubernetes.io/hostname': 'filer' },
-  }) + cert_manager.withCertManagerTLS(tls_issuer) + {
-    ingress+: k.networking.v1.ingress.metadata.withAnnotationsMixin({
-      'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
-    }),
-    deployment+: k.apps.v1.deployment.spec.template.spec.dnsConfig.withOptions({
-      name: 'ndots',
-      value: '1',
-    }),
-  },
-
-  'zigbee2mqtt': fpl.apps.zigbee2mqtt.new({
-    namespace: 'home-automation',
-    host: 'zigbee.' + domain,
-    zigbee_dev: '/dev/ttyUSB0', // '/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_a8cadaff5412ef11b6466fb8bf9df066-if00-port0',
-    storage_class: 'zfs-stripe-ssd',
-  }) + cert_manager.withCertManagerTLS(tls_issuer),
-};
-
-local home_assistant_local_ingress = k.networking.v1.ingress.new('home-assistant-local') +
-  k.networking.v1.ingress.metadata.withNamespace(home_automation.home_assistant.deployment.metadata.namespace) +
-  k.networking.v1.ingress.metadata.withAnnotationsMixin({
-    'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
-  }) +
-  k.networking.v1.ingress.spec.withRules([k.networking.v1.ingressRule.withHost('home.dl.42o.de') +
-  k.networking.v1.ingressRule.http.withPaths([
-    k.networking.v1.httpIngressPath.withPath('/') +
-    k.networking.v1.httpIngressPath.withPathType('Prefix') +
-    k.networking.v1.httpIngressPath.backend.service.withName(home_automation.home_assistant.service.metadata.name) +
-    k.networking.v1.httpIngressPath.backend.service.port.withNumber(home_automation.home_assistant._port),
-  ])]
-);
-
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
   service_type: 'LoadBalancer',
   node_selector: { 'kubernetes.io/hostname': 'filer' },
@@ -275,11 +220,6 @@ local manifests = fpl.lib.site.build({
   },
   monitoring: monitoring,
   media: media,
-  home_automation: home_automation + {
-    home_assistant+: {
-      ingress_local: home_assistant_local_ingress,
-    },
-  },
   argo: {
     argo: fpl.apps.argo.new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },

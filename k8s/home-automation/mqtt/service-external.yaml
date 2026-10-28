@@ -1,0 +1,13 @@
+# MQTT for devices on the LAN (k3s servicelb).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-external
+spec:
+  type: LoadBalancer
+  selector:
+    name: mqtt
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883

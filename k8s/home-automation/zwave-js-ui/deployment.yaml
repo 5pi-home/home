@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zwave-js-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: zwave-js-ui
+  template:
+    metadata:
+      labels:
+        name: zwave-js-ui
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: zwave-js-ui
+          image: zwavejs/zwave-js-ui:11.12.0
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: dev
+              mountPath: /dev/ttyACM-zwave
+            - name: data
+              mountPath: /usr/src/app/store
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev/ttyACM0
+            # See zigbee2mqtt: fail instead of mounting an empty directory.
+            type: CharDevice
+        - name: data
+          hostPath:
+            path: /data/zwave-js-ui
