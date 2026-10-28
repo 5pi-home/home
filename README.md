@@ -2,6 +2,8 @@
 *personal infrastructure for cloud native nerds*
 
 - Kubernetes based personal infrastucture
+- Manifests are moving from `site.jsonnet` to plain YAML + kustomize in
+  [`k8s/`](k8s/README.md), one namespace at a time.
 
 ## Bootstrapping
 Create secret to allow build-site-job to clone pass repo:
