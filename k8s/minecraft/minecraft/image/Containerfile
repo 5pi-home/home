@@ -1,0 +1,21 @@
+FROM ubuntu:22.04
+WORKDIR /paper
+ENV PAPER_DL_URL=https://papermc.io/api/v2/projects/paper/versions/1.20.1/builds/196/downloads/paper-1.20.1-196.jar
+RUN set -x && \
+    echo 'APT::Sandbox::User "root";' > /etc/apt/apt.conf.d/disable-sandbox && \
+    apt-get -qy update && \
+    apt-get -qy install apt-transport-https curl openjdk-17-jre-headless && \
+    curl -Lfo paper.jar "$PAPER_DL_URL" && \
+    java -Dpaperclip.patchonly=true -jar /paper/paper.jar && \
+    useradd -d /tmp/ minecraft && \
+    ln -s /tmp/ logs && \
+    mkdir plugins && \
+    install -d -o minecraft -g minecraft /data && \
+    curl -Lfo plugins/AmkMcAuth.jar 'https://mediafilez.forgecdn.net/files/3694/316/AmkMcAuth-1.5.3.jar' && \
+    curl -Lfo plugins/GriefPrevention.jar 'https://mediafilez.forgecdn.net/files/4433/61/GriefPrevention.jar' && \
+    curl -Lfo plugins/Geyser.jar 'https://download.geysermc.org/v2/projects/geyser/versions/2.2.0/builds/410/downloads/spigot' && \
+    curl -Lfo plugins/Dynmap.jar 'https://mediafilez.forgecdn.net/files/4978/992/Dynmap-3.7-beta-4-spigot.jar' && \
+    curl -Lfo plugins/prometheus-exporter.jar 'https://github.com/sladkoff/minecraft-prometheus-exporter/releases/download/v2.5.0/minecraft-prometheus-exporter-2.5.0.jar' && \
+    curl -Lfo plugins/SkinsRestorer.jar 'https://github.com/SkinsRestorer/SkinsRestorerX/releases/download/15.0.4/SkinsRestorer.jar'
+VOLUME ["/data"]
+

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: jupyter
+  template:
+    metadata:
+      labels:
+        name: jupyter
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      containers:
+        - name: jupyter
+          image: jupyter/base-notebook:2023-01-30
+          env:
+            - name: JUPYTER_PORT
+              value: "8888"
+          volumeMounts:
+            - name: data
+              mountPath: /home/jovyan
+      volumes:
+        - name: data
+          hostPath:
+            path: /pool-mirror-hdd/jupyter

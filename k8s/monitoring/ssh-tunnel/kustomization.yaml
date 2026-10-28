@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+# Secret "ssh-tunnel" (keys id_rsa, known_hosts) is applied by k8s/apply-secrets.

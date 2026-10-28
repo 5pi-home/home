@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: prometheus
+  template:
+    metadata:
+      labels:
+        name: prometheus
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      serviceAccountName: prometheus
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.40.4
+          args:
+            - --config.file=/etc/prometheus/prometheus.yaml
+            - --log.level=info
+            - --storage.tsdb.path=/prometheus
+            - --web.enable-lifecycle
+            - --web.enable-admin-api
+            - --web.external-url=http://prometheus.d.42o.de
+          volumeMounts:
+            - name: prometheus
+              mountPath: /prometheus
+            - name: config
+              mountPath: /etc/prometheus
+        - name: reloader
+          image: jimmidyson/configmap-reload:v0.3.0
+          args:
+            - -volume-dir
+            - /volume
+            - -webhook-url
+            - http://localhost:9090/-/reload
+          volumeMounts:
+            - name: config
+              mountPath: /volume
+      volumes:
+        - name: prometheus
+          persistentVolumeClaim:
+            claimName: prometheus
+        - name: config
+          configMap:
+            name: prometheus

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smokeping-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: smokeping-exporter
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "9374"
+        prometheus.io/scrape: "true"
+      labels:
+        name: smokeping-exporter
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      containers:
+        - name: smokeping-exporter
+          image: quay.io/superq/smokeping-prober:latest
+          args:
+            - --config.file=/config/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          configMap:
+            name: smokeping-exporter

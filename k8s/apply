@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Apply everything in k8s/ to the cluster, in this order:
+#   1. helmfile.yaml       third-party charts, including CRDs our manifests use
+#   2. kustomization.yaml  our own manifests
+#   3. apply-secrets       Secrets from pass
+#
+# Usage: k8s/apply          apply all of it
+#        k8s/apply --diff   show what would change, change nothing
+set -euo pipefail
+cd "$(dirname "$0")"
+
+case "${1:-}" in
+  --diff)
+    helmfile diff --suppress-secrets
+    kubectl diff -k . || [[ $? == 1 ]]
+    ./apply-secrets --diff
+    ;;
+  "")
+    helmfile apply --suppress-secrets
+    kubectl apply -k .
+    ./apply-secrets
+    ;;
+  *)
+    sed -n 's/^# Usage: //p; s/^#        //p' "$0" >&2
+    exit 2
+    ;;
+esac

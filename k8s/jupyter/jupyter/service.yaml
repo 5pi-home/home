@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter
+spec:
+  selector:
+    name: jupyter
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888

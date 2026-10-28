@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fuse-device-plugin
+spec:
+  selector:
+    matchLabels:
+      name: fuse-device-plugin-ds
+  template:
+    metadata:
+      labels:
+        name: fuse-device-plugin-ds
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+        - name: fuse-device-plugin
+          image: flavio/fuse-device-plugin:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: device-plugin
+              mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: device-plugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins

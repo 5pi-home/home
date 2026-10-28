@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# One-off: hand objects that were applied with kubectl (from site.jsonnet)
+# over to a helm release, so `helmfile apply` upgrades them in place instead
+# of failing with "exists and cannot be imported into the current release".
+#
+# Usage: k8s/helm-adopt <release>   (a release name from k8s/helmfile.yaml)
+set -euo pipefail
+
+release=$1
+cd "$(dirname "$0")"
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+ns=$(helmfile -l name="$release" list --output json | yq -p json '.[0].namespace')
+[[ "$ns" != null ]] || { echo "no release $release in helmfile.yaml" >&2; exit 1; }
+
+# Hooks (jobs etc.) are recreated by helm and never adopted.
+helmfile -l name="$release" template --skip-tests -q |
+  yq 'select(.kind != null and (.metadata.annotations["helm.sh/hook"] // "") == "")' > "$tmp"
+
+# kind.version.group/name and namespace of every object that already exists
+kubectl get -f "$tmp" --ignore-not-found -o yaml |
+  yq -N '.items[] | .kind + (.apiVersion | sub("^v1$", "") | sub("^([^/]+)/(.+)$", ".${2}.${1}")) + "/" +
+         .metadata.name + " " + (.metadata.namespace // "")' |
+  while read -r obj obj_ns; do
+    kubectl label ${obj_ns:+-n "$obj_ns"} --overwrite "$obj" app.kubernetes.io/managed-by=Helm >/dev/null
+    kubectl annotate ${obj_ns:+-n "$obj_ns"} --overwrite "$obj" \
+      meta.helm.sh/release-name="$release" meta.helm.sh/release-namespace="$ns" >/dev/null
+    echo "adopted $obj ${obj_ns}"
+  done
+
+# Strategic merge patches key ports by number alone, so a port used for both
+# TCP and UDP (minecraft on ingress-nginx) makes helm's patch fail. Set the
+# port lists to the chart's with a JSON patch first.
+yq -N 'select(.kind == "Service" or .kind == "Deployment" or .kind == "DaemonSet")
+       | .kind + " " + .metadata.namespace + " " + .metadata.name' "$tmp" |
+  while read -r kind obj_ns name; do
+    kubectl -n "$obj_ns" get "$kind/$name" >/dev/null 2>&1 || continue
+    sel="select(.kind == \"$kind\" and .metadata.name == \"$name\")"
+    if [[ $kind == Service ]]; then
+      patch=$(yq "$sel" "$tmp" | yq -o json -I0 "[{\"op\": \"replace\", \"path\": \"/spec/ports\", \"value\": .spec.ports}]")
+    else
+      patch=$(yq "$sel" "$tmp" | yq -o json -I0 "[.spec.template.spec.containers | to_entries | .[] | select(.value.ports)
+        | {\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/\" + (.key | tostring) + \"/ports\", \"value\": .value.ports}]")
+    fi
+    [[ $patch == "[]" ]] || kubectl -n "$obj_ns" patch "$kind/$name" --type=json -p "$patch"
+  done

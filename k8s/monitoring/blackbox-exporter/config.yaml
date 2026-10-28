@@ -1,0 +1,56 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+  http_post_2xx:
+    http:
+      body_size_limit: 1MB
+      method: POST
+    prober: http
+    timeout: 5s
+  icmp_test:
+    icmp:
+      preferred_ip_protocol: ip4
+    prober: icmp
+    timeout: 5s
+  irc_banner:
+    prober: tcp
+    tcp:
+      query_response:
+        - send: NICK prober
+        - send: USER prober prober prober :prober
+        - expect: PING :([^ ]+)
+          send: PONG ${1}
+        - expect: ^:[^ ]+ 001
+    timeout: 5s
+  pop3s_banner:
+    prober: tcp
+    tcp:
+      query_response:
+        - expect: ^+OK
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+  smtp_starttls:
+    prober: tcp
+    tcp:
+      query_response:
+        - expect: '^220 '
+        - send: "EHLO prober\r"
+        - expect: ^250-STARTTLS
+        - send: "STARTTLS\r"
+        - expect: ^220
+        - starttls: true
+        - send: "EHLO prober\r"
+        - expect: ^250-AUTH
+        - send: "QUIT\r"
+    timeout: 5s
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+        - expect: ^SSH-2.0-
+    timeout: 5s
+  tcp_connect:
+    prober: tcp
+    timeout: 5s

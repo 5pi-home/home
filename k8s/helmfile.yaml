@@ -1,0 +1,233 @@
+# Third-party software from upstream charts. Everything we write ourselves is
+# plain YAML in the namespace directories next to this file. Pin every chart
+# version; upgrade by bumping it and checking `k8s/apply --diff`.
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: go-vikunja
+    oci: true
+    url: ghcr.io/go-vikunja/helm-chart
+  - name: immich
+    oci: true
+    url: ghcr.io/immich-app/immich-charts
+  - name: cnpg
+    url: https://cloudnative-pg.github.io/charts
+  - name: dysnix
+    url: https://dysnix.github.io/charts
+
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    chart: jetstack/cert-manager
+    version: v1.16.2
+    values:
+      - crds:
+          enabled: true
+          # Deleting the CRDs would delete every Certificate in the cluster.
+          keep: true
+        extraArgs:
+          - --default-issuer-name=letsencrypt-staging
+          - --default-issuer-kind=ClusterIssuer
+          - --default-issuer-group=cert-manager.io
+
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    chart: ingress-nginx/ingress-nginx
+    version: 4.7.0
+    values:
+      - controller:
+          nodeSelector:
+            kubernetes.io/hostname: filer
+          watchIngressWithoutClass: true
+          # Nothing uses them, and they let anyone who can create an Ingress
+          # inject nginx config. Off by default from chart 4.8 on.
+          allowSnippetAnnotations: false
+          service:
+            ipFamilyPolicy: PreferDualStack
+            ipFamilies: [IPv4, IPv6]
+          config:
+            global-auth-url: https://oauth2-proxy.d.42o.de/oauth2/auth
+            global-auth-signin: https://oauth2-proxy.d.42o.de/start?rd=$scheme://$host$request_uri
+        tcp:
+          "25565": minecraft/minecraft:25565
+        udp:
+          "25565": minecraft/minecraft:25565
+          "19132": minecraft/minecraft:19132
+
+  - name: vikunja
+    namespace: apps
+    chart: go-vikunja/vikunja
+    version: 2.0.0
+    values:
+      - vikunja:
+          ingress:
+            main:
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-production
+                nginx.ingress.kubernetes.io/enable-global-auth: "false"
+              hosts:
+                - host: todo.d.42o.de
+                  paths:
+                    - path: /
+              tls:
+                - secretName: todo.d.42o.de
+                  hosts:
+                    - todo.d.42o.de
+          configMaps:
+            config:
+              data:
+                config.yml: |
+                  service:
+                    publicurl: https://todo.d.42o.de
+          persistence:
+            data:
+              storageClass: pool-mirror-hdd
+            database:
+              storageClass: pool-mirror-hdd
+
+  - name: cloudnative-pg
+    namespace: cnpg-system
+    chart: cnpg/cloudnative-pg
+    version: 0.23.0
+    values:
+      - resources:
+          requests:
+            cpu: 50m
+          limits:
+            memory: 500Mi
+
+  - name: immich-db
+    namespace: apps
+    chart: cnpg/cluster
+    version: 0.1.0
+    needs:
+      - cnpg-system/cloudnative-pg
+    values:
+      - cluster:
+          instances: 1
+          # pre-built postgres image with VectorChord extension for Immich
+          imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16-0.4.3
+          storage:
+            storageClass: pool-mirror-hdd
+            size: 20Gi
+          postgresql:
+            shared_preload_libraries:
+              - vchord.so
+          initdb:
+            postInitApplicationSQL:
+              - CREATE EXTENSION IF NOT EXISTS vchord CASCADE
+              - CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
+              - CREATE EXTENSION IF NOT EXISTS cube CASCADE
+              - CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              memory: 1Gi
+
+  - name: immich-library-pvc
+    namespace: apps
+    chart: dysnix/raw
+    version: 0.3.1
+    values:
+      - resources:
+          - apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: immich-library
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: pool-mirror-hdd
+              resources:
+                requests:
+                  storage: 200Gi
+
+  - name: immich
+    namespace: apps
+    chart: immich/immich
+    version: 0.10.3
+    needs:
+      - apps/immich-db
+      - apps/immich-library-pvc
+    values:
+      - immich:
+          persistence:
+            library:
+              existingClaim: immich-library
+
+        # CNPG creates a secret named "{cluster-name}-app" with host/user/password keys
+        controllers:
+          main:
+            rollingUpdate:
+              maxSurge: 0
+              maxUnavailable: 1
+            containers:
+              main:
+                image:
+                  tag: v2.5.6
+                env:
+                  DB_HOSTNAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: immich-db-cluster-app
+                        key: host
+                  DB_USERNAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: immich-db-cluster-app
+                        key: username
+                  DB_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: immich-db-cluster-app
+                        key: password
+                  DB_DATABASE_NAME:
+                    valueFrom:
+                      secretKeyRef:
+                        name: immich-db-cluster-app
+                        key: dbname
+
+        valkey:
+          enabled: true
+          persistence:
+            data:
+              type: persistentVolumeClaim
+              storageClass: pool-mirror-hdd
+              size: 1Gi
+
+        server:
+          ingress:
+            main:
+              enabled: true
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-production
+                nginx.ingress.kubernetes.io/proxy-body-size: "0"
+                nginx.ingress.kubernetes.io/enable-global-auth: "false"
+              hosts:
+                - host: photos.d.42o.de
+                  paths:
+                    - path: /
+              tls:
+                - secretName: photos.d.42o.de
+                  hosts:
+                    - photos.d.42o.de
+          resources:
+            requests:
+              cpu: 100m
+            limits:
+              memory: 4Gi
+
+        machine-learning:
+          resources:
+            requests:
+              cpu: 50m
+            limits:
+              memory: 6Gi
+          persistence:
+            cache:
+              type: persistentVolumeClaim
+              storageClass: pool-mirror-hdd
+              size: 10Gi

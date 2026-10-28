@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: radarr
+  template:
+    metadata:
+      labels:
+        name: radarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: radarr
+          image: lscr.io/linuxserver/radarr:5.7.0.8882-ls228
+          command:
+            - /app/radarr/bin/Radarr
+            - --data=/config/
+          volumeMounts:
+            - name: radarr
+              mountPath: /config
+            - name: media
+              mountPath: /media
+      volumes:
+        - name: radarr
+          persistentVolumeClaim:
+            claimName: radarr
+        - name: media
+          hostPath:
+            path: /pool-mirror-hdd/media
