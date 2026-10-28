@@ -26,6 +26,7 @@ local monitoring = (import 'monitoring.libsonnet') + {
 local minecraft = import 'minecraft.libsonnet';
 
 local cert_manager = fpl.apps.cert_manager;
+
 local zfs = fpl.stacks.zfs {
   _config+: {
     pools: [
@@ -87,6 +88,20 @@ local home_automation = {
     storage_class: 'zfs-stripe-ssd',
   }) + cert_manager.withCertManagerTLS(tls_issuer),
 };
+
+local home_assistant_local_ingress = k.networking.v1.ingress.new('home-assistant-local') +
+  k.networking.v1.ingress.metadata.withNamespace(home_automation.home_assistant.deployment.metadata.namespace) +
+  k.networking.v1.ingress.metadata.withAnnotationsMixin({
+    'nginx.ingress.kubernetes.io/enable-global-auth': 'false',
+  }) +
+  k.networking.v1.ingress.spec.withRules([k.networking.v1.ingressRule.withHost('home.dl.42o.de') +
+  k.networking.v1.ingressRule.http.withPaths([
+    k.networking.v1.httpIngressPath.withPath('/') +
+    k.networking.v1.httpIngressPath.withPathType('Prefix') +
+    k.networking.v1.httpIngressPath.backend.service.withName(home_automation.home_assistant.service.metadata.name) +
+    k.networking.v1.httpIngressPath.backend.service.port.withNumber(home_automation.home_assistant._port),
+  ])]
+);
 
 local ingress_nginx = fpl.apps['ingress-nginx'].new({
   service_type: 'LoadBalancer',
@@ -260,7 +275,11 @@ local manifests = fpl.lib.site.build({
   },
   monitoring: monitoring,
   media: media,
-  home_automation: home_automation,
+  home_automation: home_automation + {
+    home_assistant+: {
+      ingress_local: home_assistant_local_ingress,
+    },
+  },
   argo: {
     argo: fpl.apps.argo.new({
       node_selector: { 'kubernetes.io/arch': 'amd64' },
