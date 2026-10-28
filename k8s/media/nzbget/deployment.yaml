@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nzbget
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: nzbget
+  template:
+    metadata:
+      labels:
+        name: nzbget
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: nzbget
+          image: fish/nzbget:v21.1
+          args:
+            - -s
+            - --configfile=/etc/nzbget/nzbget.conf
+            - -o
+            - Server1.Username=$(SERVER1_USERNAME)
+            - -o
+            - Server1.Password=$(SERVER1_PASSWORD)
+            - -o
+            - Feed1.URL=$(FEED1_URL)
+          envFrom:
+            - secretRef:
+                name: nzbget
+          volumeMounts:
+            - name: nzbget
+              mountPath: /nzbget/downloads
+            - name: media
+              mountPath: /media
+            - name: cacerts
+              mountPath: /etc/ssl/certs/ca-certificates.crt
+            - name: config
+              mountPath: /etc/nzbget
+      volumes:
+        - name: nzbget
+          persistentVolumeClaim:
+            claimName: nzbget
+        - name: media
+          hostPath:
+            path: /pool-mirror-hdd/media
+        - name: cacerts
+          hostPath:
+            path: /etc/ssl/certs/ca-certificates.crt
+        - name: config
+          configMap:
+            name: nzbget-config

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minecraft
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    nginx.ingress.kubernetes.io/enable-global-auth: "false"
+spec:
+  rules:
+    - host: minecraft.d.42o.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minecraft
+                port:
+                  number: 8123
+  tls:
+    - hosts:
+        - minecraft.d.42o.de
+      secretName: minecraft.d.42o.de

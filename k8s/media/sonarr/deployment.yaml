@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: sonarr
+  template:
+    metadata:
+      labels:
+        name: sonarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: sonarr
+          image: fish/sonarr@sha256:66dfdb71890123758b154f922825288b272531be759d27f5ca2860a9cebdd2b8
+          volumeMounts:
+            - name: sonarr
+              mountPath: /data
+            - name: media
+              mountPath: /media
+      volumes:
+        - name: sonarr
+          persistentVolumeClaim:
+            claimName: sonarr
+        - name: media
+          hostPath:
+            path: /pool-mirror-hdd/media

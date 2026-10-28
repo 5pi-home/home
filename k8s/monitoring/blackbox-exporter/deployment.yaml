@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: blackbox-exporter
+  template:
+    metadata:
+      labels:
+        name: blackbox-exporter
+    spec:
+      containers:
+        - name: blackbox-exporter
+          image: prom/blackbox-exporter:v0.23.0
+          args:
+            - --config.file=/blackbox-exporter/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /blackbox-exporter
+      volumes:
+        - name: config
+          configMap:
+            name: blackbox-exporter

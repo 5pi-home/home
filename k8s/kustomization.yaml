@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Everything except third-party charts (helmfile.yaml) and Secrets
+# (apply-secrets). Apply all of it with k8s/apply.
+resources:
+  - cluster
+  - cert-manager
+  - kube-system
+  - ingress-nginx
+  - data
+  - default
+  - home-automation
+  - jupyter
+  - media
+  - minecraft
+  - monitoring

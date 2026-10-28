@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+configMapGenerator:
+  - name: nzbget-config
+    files:
+      - nzbget.conf
+    options:
+      disableNameSuffixHash: true
+# Secret "nzbget" (SERVER1_USERNAME, SERVER1_PASSWORD, FEED1_URL) is applied by
+# k8s/apply-secrets; the deployment passes them to nzbget with -o.

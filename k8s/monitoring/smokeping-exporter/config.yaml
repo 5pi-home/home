@@ -1,0 +1,6 @@
+targets:
+  - hosts:
+      - google.com
+      - heise.de
+      - 137.221.66.43
+      - 104.44.32.105

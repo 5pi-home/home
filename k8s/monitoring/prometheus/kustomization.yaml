@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - serviceaccount.yaml
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+configMapGenerator:
+  - name: prometheus
+    files:
+      - prometheus.yaml
+      - kubernetes.alerting.rules.yaml
+      - kubernetes.recording.rules.yaml
+      - node.alerting.rules.yaml
+      - node.recording.rules.yaml
+    options:
+      disableNameSuffixHash: true

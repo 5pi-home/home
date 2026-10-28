@@ -1,0 +1,71 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - serviceaccount.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+# Secret "grafana" (key oauth-client-secret) is applied by k8s/apply-secrets.
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: grafana
+    files:
+      - grafana.ini
+      - datasources.yaml
+      - dashboards.yaml
+  # One ConfigMap per dashboard: together they exceed the size limit of one.
+  - name: grafana-dashboard-apiserver
+    files: [dashboards/apiserver.json]
+  - name: grafana-dashboard-cluster-total
+    files: [dashboards/cluster-total.json]
+  - name: grafana-dashboard-controller-manager
+    files: [dashboards/controller-manager.json]
+  - name: grafana-dashboard-garden
+    files: [dashboards/garden.json]
+  - name: grafana-dashboard-k8s-resources-cluster
+    files: [dashboards/k8s-resources-cluster.json]
+  - name: grafana-dashboard-k8s-resources-namespace
+    files: [dashboards/k8s-resources-namespace.json]
+  - name: grafana-dashboard-k8s-resources-node
+    files: [dashboards/k8s-resources-node.json]
+  - name: grafana-dashboard-k8s-resources-pod
+    files: [dashboards/k8s-resources-pod.json]
+  - name: grafana-dashboard-k8s-resources-workload
+    files: [dashboards/k8s-resources-workload.json]
+  - name: grafana-dashboard-k8s-resources-workloads-namespace
+    files: [dashboards/k8s-resources-workloads-namespace.json]
+  - name: grafana-dashboard-kubelet
+    files: [dashboards/kubelet.json]
+  - name: grafana-dashboard-minecraft-players
+    files: [dashboards/minecraft-players.json]
+  - name: grafana-dashboard-minecraft-server
+    files: [dashboards/minecraft-server.json]
+  - name: grafana-dashboard-namespace-by-pod
+    files: [dashboards/namespace-by-pod.json]
+  - name: grafana-dashboard-namespace-by-workload
+    files: [dashboards/namespace-by-workload.json]
+  - name: grafana-dashboard-node-cluster-rsrc-use
+    files: [dashboards/node-cluster-rsrc-use.json]
+  - name: grafana-dashboard-node-rsrc-use
+    files: [dashboards/node-rsrc-use.json]
+  - name: grafana-dashboard-nodes-aix
+    files: [dashboards/nodes-aix.json]
+  - name: grafana-dashboard-nodes-darwin
+    files: [dashboards/nodes-darwin.json]
+  - name: grafana-dashboard-nodes
+    files: [dashboards/nodes.json]
+  - name: grafana-dashboard-persistentvolumesusage
+    files: [dashboards/persistentvolumesusage.json]
+  - name: grafana-dashboard-pod-total
+    files: [dashboards/pod-total.json]
+  - name: grafana-dashboard-prosafe
+    files: [dashboards/prosafe.json]
+  - name: grafana-dashboard-proxy
+    files: [dashboards/proxy.json]
+  - name: grafana-dashboard-scheduler
+    files: [dashboards/scheduler.json]
+  - name: grafana-dashboard-smokeping
+    files: [dashboards/smokeping.json]
+  - name: grafana-dashboard-workload-total
+    files: [dashboards/workload-total.json]

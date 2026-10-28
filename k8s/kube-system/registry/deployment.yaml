@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: registry
+  template:
+    metadata:
+      labels:
+        name: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2.7.1
+          env:
+            - name: REGISTRY_AUTH
+              value: htpasswd
+            - name: REGISTRY_AUTH_HTPASSWD_PATH
+              value: /auth/htpasswd
+            - name: REGISTRY_AUTH_HTPASSWD_REALM
+              value: Registry
+          volumeMounts:
+            - name: registry
+              mountPath: /var/lib/registry
+            - name: config
+              mountPath: /auth
+      volumes:
+        - name: registry
+          persistentVolumeClaim:
+            claimName: registry
+        - name: config
+          secret:
+            secretName: registry

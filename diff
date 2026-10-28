@@ -1,4 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-
-find "$1" -name '*.yaml' -exec kubectl diff -f {} \;
