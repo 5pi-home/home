@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: home-assistant
+  template:
+    metadata:
+      labels:
+        name: home-assistant
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: home-assistant
+          image: homeassistant/home-assistant:2026.4.0
+          command: [python3, -m, homeassistant, --config, /config]
+          securityContext:
+            privileged: true
+          livenessProbe:
+            httpGet:
+              port: 8123
+            initialDelaySeconds: 600
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          hostPath:
+            path: /data/home-assistant

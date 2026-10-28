@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    # Not behind oauth2-proxy; Home Assistant does its own auth.
+    nginx.ingress.kubernetes.io/enable-global-auth: "false"
+spec:
+  tls:
+    - hosts: [home.d.42o.de]
+      secretName: home.d.42o.de
+  rules:
+    - host: home.d.42o.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: home-assistant
+                port:
+                  number: 8123

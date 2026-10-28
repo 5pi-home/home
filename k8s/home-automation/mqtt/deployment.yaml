@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mqtt
+  template:
+    metadata:
+      labels:
+        name: mqtt
+    spec:
+      securityContext:
+        fsGroup: 1883
+      containers:
+        - name: mqtt
+          image: eclipse-mosquitto:2.0.20
+          ports:
+            - containerPort: 1883
+          volumeMounts:
+            - name: data
+              mountPath: /mosquitto/data
+            - name: config
+              mountPath: /mosquitto/config
+            - name: passwd
+              mountPath: /mosquitto/passwd
+      volumes:
+        - name: data
+          hostPath:
+            path: /data/mqtt
+        - name: config
+          configMap:
+            name: mqtt
+        - name: passwd
+          secret:
+            secretName: mqtt
+            defaultMode: 0600

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: zigbee2mqtt
+  template:
+    metadata:
+      labels:
+        name: zigbee2mqtt
+    spec:
+      # The Sonoff Zigbee dongle is plugged into filer.
+      nodeSelector:
+        kubernetes.io/hostname: filer
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 20
+      containers:
+        - name: zigbee2mqtt
+          image: koenkk/zigbee2mqtt:latest
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: dev
+              mountPath: /dev/ttyACM0
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev/ttyUSB0
+            # Without a type, a missing device makes the kubelet create an
+            # empty directory in its place (and zigbee2mqtt then fails with
+            # "Is a directory").
+            type: CharDevice
+        - name: data
+          persistentVolumeClaim:
+            claimName: zigbee2mqtt
