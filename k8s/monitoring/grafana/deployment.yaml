@@ -26,7 +26,7 @@ spec:
       serviceAccountName: grafana
       containers:
         - name: grafana
-          image: docker.io/grafana/grafana:9.3.2
+          image: docker.io/grafana/grafana:13.2.4
           env:
             - name: GF_AUTH_GITHUB_CLIENT_SECRET
               valueFrom:
@@ -43,10 +43,10 @@ spec:
           resources:
             limits:
               cpu: 200m
-              memory: 200Mi
+              memory: 512Mi
             requests:
               cpu: 100m
-              memory: 100Mi
+              memory: 256Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -96,6 +96,8 @@ spec:
               - configMap:
                   name: grafana-dashboard-k8s-resources-node
               - configMap:
+                  name: grafana-dashboard-k8s-resources-nodes-overview
+              - configMap:
                   name: grafana-dashboard-k8s-resources-pod
               - configMap:
                   name: grafana-dashboard-k8s-resources-workload
@@ -115,10 +117,6 @@ spec:
                   name: grafana-dashboard-node-cluster-rsrc-use
               - configMap:
                   name: grafana-dashboard-node-rsrc-use
-              - configMap:
-                  name: grafana-dashboard-nodes-aix
-              - configMap:
-                  name: grafana-dashboard-nodes-darwin
               - configMap:
                   name: grafana-dashboard-nodes
               - configMap:

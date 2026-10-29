@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Render Prometheus rules and Grafana dashboards from the mixins pinned in
+# jsonnetfile.json (see mixins.jsonnet). Needs jsonnet and jb
+# (jsonnet-bundler). To upgrade a mixin: bump its version in
+# jsonnetfile.json, run `jb update <remote>` and this script.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+jb install >/dev/null
+jsonnet -J vendor -S -m .. mixins.jsonnet |
+  while read -r f; do
+    case $f in *.yaml) yq -i -P . "$f" ;; esac
+    echo "${f#*/monitoring/}"
+  done

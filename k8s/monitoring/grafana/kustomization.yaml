@@ -29,6 +29,8 @@ configMapGenerator:
     files: [dashboards/k8s-resources-namespace.json]
   - name: grafana-dashboard-k8s-resources-node
     files: [dashboards/k8s-resources-node.json]
+  - name: grafana-dashboard-k8s-resources-nodes-overview
+    files: [dashboards/k8s-resources-nodes-overview.json]
   - name: grafana-dashboard-k8s-resources-pod
     files: [dashboards/k8s-resources-pod.json]
   - name: grafana-dashboard-k8s-resources-workload
@@ -49,10 +51,6 @@ configMapGenerator:
     files: [dashboards/node-cluster-rsrc-use.json]
   - name: grafana-dashboard-node-rsrc-use
     files: [dashboards/node-rsrc-use.json]
-  - name: grafana-dashboard-nodes-aix
-    files: [dashboards/nodes-aix.json]
-  - name: grafana-dashboard-nodes-darwin
-    files: [dashboards/nodes-darwin.json]
   - name: grafana-dashboard-nodes
     files: [dashboards/nodes.json]
   - name: grafana-dashboard-persistentvolumesusage

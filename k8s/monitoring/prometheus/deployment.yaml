@@ -20,7 +20,7 @@ spec:
       serviceAccountName: prometheus
       containers:
         - name: prometheus
-          image: prom/prometheus:v2.40.4
+          image: prom/prometheus:v3.15.0
           args:
             - --config.file=/etc/prometheus/prometheus.yaml
             - --log.level=info
@@ -34,7 +34,7 @@ spec:
             - name: config
               mountPath: /etc/prometheus
         - name: reloader
-          image: jimmidyson/configmap-reload:v0.3.0
+          image: ghcr.io/jimmidyson/configmap-reload:v0.15.0
           args:
             - -volume-dir
             - /volume
