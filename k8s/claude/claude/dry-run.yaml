@@ -94,7 +94,7 @@ spec:
         (has(request.dryRun) && request.dryRun == true) ||
         (request.operation == 'CONNECT' && request.resource.resource == 'services' &&
         request.subResource == 'proxy' && request.namespace == 'monitoring' &&
-        request.name == 'prometheus')
+        request.name == 'prometheus:http')
       message: claude may only send dry-run requests
 ---
 apiVersion: admissionregistration.k8s.io/v1

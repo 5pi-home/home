@@ -81,7 +81,7 @@ rules:
     resources:
       - services/proxy
     resourceNames:
-      - prometheus
+      - prometheus:http
     verbs:
       - get
 ---
