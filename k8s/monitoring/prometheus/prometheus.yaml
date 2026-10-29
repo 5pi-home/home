@@ -34,6 +34,13 @@ scrape_configs:
     scheme: https
     tls_config:
       ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    metric_relabel_configs:
+      # k3s serves the metrics of all its components (apiserver, etcd,
+      # scheduler, ...) here too; the kube-apiserver job has them already.
+      - action: keep
+        regex: (kubelet|kubeproxy|volume_manager|storage_operation|prober|rest_client|process|go)_.+
+        source_labels:
+          - __name__
   - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
     job_name: cadvisor
     kubernetes_sd_configs:
