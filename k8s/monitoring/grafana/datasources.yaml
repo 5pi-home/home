@@ -7,3 +7,4 @@ datasources:
     type: prometheus
     url: http://prometheus.monitoring.svc:9090
     version: 1
+    uid: P1809F7CD0C75ACF3 # what Grafana derived from the name; garden.json refers to it
