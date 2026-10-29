@@ -1,0 +1,107 @@
+# Dry-run writes, for `kubectl diff` and `kubectl apply --dry-run=server`.
+# claude-dry-run-only below makes sure they stay dry-run.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: claude-dry-run
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - limitranges
+      - namespaces
+      - persistentvolumeclaims
+      - persistentvolumes
+      - podtemplates
+      - replicationcontrollers
+      - resourcequotas
+      - serviceaccounts
+      - services
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - apiextensions.k8s.io
+      - apps
+      - argoproj.io
+      - autoscaling
+      - batch
+      - cert-manager.io
+      - imagecontroller.5pi.de
+      - networking.k8s.io
+      - policy
+      - rbac.authorization.k8s.io
+      - scheduling.k8s.io
+      - snapshot.storage.k8s.io
+      - storage.k8s.io
+      - zfs.openebs.io
+    resources:
+      - '*'
+    verbs:
+      - create
+      - patch
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: claude-dry-run
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: claude-dry-run
+subjects:
+  - kind: ServiceAccount
+    name: claude
+---
+# Denies every write by claude that is not a dry-run, whatever RBAC allows.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: claude-dry-run-only
+spec:
+  failurePolicy: Fail
+  matchConditions:
+    - expression: request.userInfo.username == 'system:serviceaccount:claude:claude'
+      name: is-claude
+  matchConstraints:
+    matchPolicy: Equivalent
+    namespaceSelector: {}
+    objectSelector: {}
+    resourceRules:
+      - apiGroups:
+          - '*'
+        apiVersions:
+          - '*'
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+          - CONNECT
+        # All resources and subresources. '*' would leave out subresources
+        # (deployments/scale, pods/eviction, ...).
+        resources:
+          - '*/*'
+        scope: '*'
+  validations:
+    # Exception: reading Prometheus (alerts, queries) through the API
+    # server's service proxy, which is a CONNECT. RBAC (claude-read) only
+    # allows GET there.
+    - expression: >-
+        (has(request.dryRun) && request.dryRun == true) ||
+        (request.operation == 'CONNECT' && request.resource.resource == 'services' &&
+        request.subResource == 'proxy' && request.namespace == 'monitoring' &&
+        request.name == 'prometheus')
+      message: claude may only send dry-run requests
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: claude-dry-run-only
+spec:
+  policyName: claude-dry-run-only
+  validationActions:
+    - Deny
