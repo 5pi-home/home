@@ -33,6 +33,7 @@ k8s/
   helm-adopt              one-off, see "Migrating from site.jsonnet"
   kustomization.yaml      lists the directories below
   cluster/                cluster-wide: storage classes, zfs-localpv driver
+  claude/                 access for Claude (AI agent): read + dry-run only
   <namespace>/
     kustomization.yaml    sets the namespace, lists the apps
     namespace.yaml

@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - cluster
   - cert-manager
+  - claude
   - kube-system
   - ingress-nginx
   - data
