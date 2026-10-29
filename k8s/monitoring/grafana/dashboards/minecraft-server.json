@@ -882,5 +882,6 @@
   },
   "timezone": "browser",
   "title": "Minecraft",
-  "version": 1
+  "version": 1,
+  "uid": "minecraft-server"
 }
