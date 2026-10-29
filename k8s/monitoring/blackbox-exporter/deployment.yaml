@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: blackbox-exporter
-          image: prom/blackbox-exporter:v0.23.0
+          image: prom/blackbox-exporter:v0.29.0
           args:
             - --config.file=/blackbox-exporter/config.yaml
           volumeMounts:

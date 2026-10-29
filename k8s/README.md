@@ -51,6 +51,10 @@ k8s/
   sets the namespace and builds ConfigMaps from real files
   (`configMapGenerator` with `disableNameSuffixHash`); no patches, overlays or
   templating.
+- Exception: the Kubernetes and node Prometheus rules and Grafana dashboards
+  are rendered from the upstream mixins by `monitoring/mixins/build` (needs
+  `jsonnet` and `jb`). The output is committed; change `mixins.jsonnet`, not
+  the rendered files.
 - No `metadata.namespace` in app manifests; the namespace kustomization sets it.
 - Objects are named after the app, pods select on `name: <app>`.
 - Pin the node with `nodeSelector: kubernetes.io/hostname` when an app uses
