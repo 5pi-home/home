@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # One-off: hand objects that were applied with kubectl (from site.jsonnet)
-# over to a helm release, so `helmfile apply` upgrades them in place instead
+# over to a helm release and install it, so helm upgrades them in place instead
 # of failing with "exists and cannot be imported into the current release".
+# Safe to rerun.
 #
 # Usage: k8s/helm-adopt <release>   (a release name from k8s/helmfile.yaml)
 set -euo pipefail
@@ -45,3 +46,12 @@ yq -N 'select(.kind == "Service" or .kind == "Deployment" or .kind == "DaemonSet
     fi
     [[ $patch == "[]" ]] || kubectl -n "$obj_ns" patch "$kind/$name" --type=json -p "$patch"
   done
+
+# Install the release on top of the adopted objects. Helm 4 installs with
+# server-side apply, which refuses to take over fields `kubectl apply` set, so
+# use client-side apply like Helm 3; later upgrades stick with it. `sync`, not
+# `apply`: after a failed install, helm-diff compares against that release and
+# finds nothing to do.
+server_side=""
+[[ $(helm version --short) == v3.* ]] || server_side=--server-side=false
+helmfile -l name="$release" sync $server_side

@@ -92,10 +92,12 @@ k8s/helm-adopt cert-manager
 k8s/helm-adopt ingress-nginx
 ```
 
-It labels the existing objects as part of the release, so helm upgrades them
-in place (no downtime, CRDs and certificates stay). For ingress-nginx it also
-rewrites the controller's port lists first, because helm can't patch a port
-used for both TCP and UDP.
+It labels the existing objects as part of the release and installs it, so
+helm upgrades them in place (no downtime, CRDs and certificates stay). For
+ingress-nginx it also rewrites the controller's port lists first, because
+helm can't patch a port used for both TCP and UDP. With Helm 4 it installs
+with client-side apply, because server-side apply conflicts with the fields
+`kubectl apply` set. It's safe to rerun, e.g. after a failed `k8s/apply`.
 
 Left over afterwards, delete by hand when convenient:
 
