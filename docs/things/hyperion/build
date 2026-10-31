@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Build the Hyperion.NG webOS loader ipk in a podman container, the same way
+# hyperion.ng-webos-loader's CI (.github/workflows/build.yml) does. Usage:
+#
+#   ./build [path to a hyperion.ng-webos-loader checkout]
+#
+# Without a path it builds LOADER_REF of the upstream repo. The ipk ends up in
+# ./out. Toolchain, Qt and ccache are kept in ./cache, so only the first build
+# is slow (about an hour for Qt). Defaults follow the loader's CI.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+LOADER_REF=${LOADER_REF:-master}
+HYPERION_NG_REF=${HYPERION_NG_REF:-2.2.1}
+QT_VERSION=${QT_VERSION:-6.8.3}
+TOOLCHAIN_URL=${TOOLCHAIN_URL:-https://github.com/openlgtv/buildroot-nc4/releases/download/webos-b17b4cc/arm-webos-linux-gnueabi_sdk-buildroot.tar.gz}
+NODE_VERSION=${NODE_VERSION:-14.21.3}
+
+mkdir -p cache/toolchain out
+if [[ $# -gt 0 ]]; then
+  src=$(realpath "$1")
+else
+  src=$PWD/cache/src
+  rm -rf "$src"
+  git clone -q --branch "$LOADER_REF" --recurse-submodules --shallow-submodules --depth 1 \
+    https://github.com/webosbrew/hyperion.ng-webos-loader "$src"
+fi
+
+podman run --rm -i \
+  -v "$src:/src:ro,Z" \
+  -v "$PWD/cache:/cache:Z" \
+  -v "$PWD/cache/toolchain:/opt/arm-webos-linux-gnueabi_sdk-buildroot:Z" \
+  -v "$PWD/out:/out:Z" \
+  -v "$PWD/build-in-container.sh:/build.sh:ro,Z" \
+  -e HYPERION_NG_REF="$HYPERION_NG_REF" -e QT_VERSION="$QT_VERSION" \
+  -e TOOLCHAIN_URL="$TOOLCHAIN_URL" -e NODE_VERSION="$NODE_VERSION" \
+  docker.io/library/ubuntu:24.04 bash /build.sh
