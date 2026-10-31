@@ -32,10 +32,34 @@ local alerts(mixin) = mixin.prometheusAlerts {
   ],
 };
 
+// The dashboards still query metrics Kubernetes no longer exports:
+// - scheduler_volume_scheduling_duration_seconds, removed in 1.23
+//   (kubernetes/kubernetes#104518): drop those queries.
+// - kubelet_node_config_error, gone with Dynamic Kubelet Config in 1.24:
+//   drop the Config Error Count panel.
+// - storage_operation_errors_total, removed in 1.23: failures are counted in
+//   storage_operation_duration_seconds with status!="success" instead.
+// Upstream: kubernetes-sigs/kubernetes-mixin#1314 (kubelet only).
+local removedMetrics = ['scheduler_volume_scheduling_duration_seconds', 'kubelet_node_config_error'];
+local fixQuery(t) = t + if std.objectHas(t, 'expr') then {
+  expr: std.strReplace(t.expr, 'storage_operation_errors_total{', 'storage_operation_duration_seconds_count{status!="success",'),
+} else {};
+local queriesRemoved(t) = std.objectHas(t, 'expr') && std.any([std.length(std.findSubstr(m, t.expr)) > 0 for m in removedMetrics]);
+local fixPanel(p) = p + if std.objectHas(p, 'targets') then {
+  targets: [fixQuery(t) for t in p.targets if !queriesRemoved(t)],
+} else {};
+// Panels left without queries are dropped.
+local fixPanels(panels) = [
+  p
+  for p in std.map(fixPanel, panels)
+  if !std.objectHas(p, 'targets') || std.length(p.targets) > 0
+];
+local fixDashboard(d) = d + if std.objectHas(d, 'panels') then { panels: fixPanels(d.panels) } else {};
+
 // Dashboards for nodes we don't have
 local skip = ['nodes-aix.json', 'nodes-darwin.json'];
 local dashboards = {
-  [name]: d
+  [name]: fixDashboard(d)
   for mixin in [kubernetes, node]
   for name in std.objectFields(mixin.grafanaDashboards)
   if std.length(std.findSubstr('windows', name)) == 0 && !std.member(skip, name)
