@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 WORKDIR /paper
-ENV PAPER_DL_URL=https://papermc.io/api/v2/projects/paper/versions/1.20.1/builds/196/downloads/paper-1.20.1-196.jar
+ENV PAPER_DL_URL=https://fill-data.papermc.io/v1/objects/234a9b32098100c6fc116664d64e36ccdb58b5b649af0f80bcccb08b0255eaea/paper-1.20.1-196.jar
 RUN set -x && \
     echo 'APT::Sandbox::User "root";' > /etc/apt/apt.conf.d/disable-sandbox && \
     apt-get -qy update && \
