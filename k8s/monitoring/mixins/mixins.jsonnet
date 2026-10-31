@@ -22,6 +22,16 @@ local node = (import 'node-mixin/mixin.libsonnet') + {
   },
 };
 
+// KubeMemoryOvercommit fires when the pods wouldn't fit after losing the
+// largest node. With filer and a small Pi that's never the case.
+local skipAlerts = ['KubeMemoryOvercommit'];
+local alerts(mixin) = mixin.prometheusAlerts {
+  groups: [
+    g { rules: [r for r in g.rules if !std.member(skipAlerts, std.get(r, 'alert', ''))] }
+    for g in mixin.prometheusAlerts.groups
+  ],
+};
+
 // Dashboards for nodes we don't have
 local skip = ['nodes-aix.json', 'nodes-darwin.json'];
 local dashboards = {
@@ -34,9 +44,9 @@ local dashboards = {
 
 {
   ['prometheus/kubernetes.recording.rules.yaml']: std.manifestYamlDoc(kubernetes.prometheusRules),
-  ['prometheus/kubernetes.alerting.rules.yaml']: std.manifestYamlDoc(kubernetes.prometheusAlerts),
+  ['prometheus/kubernetes.alerting.rules.yaml']: std.manifestYamlDoc(alerts(kubernetes)),
   ['prometheus/node.recording.rules.yaml']: std.manifestYamlDoc(node.prometheusRules),
-  ['prometheus/node.alerting.rules.yaml']: std.manifestYamlDoc(node.prometheusAlerts),
+  ['prometheus/node.alerting.rules.yaml']: std.manifestYamlDoc(alerts(node)),
 } + {
   ['grafana/dashboards/' + name]: std.manifestJsonEx(dashboards[name], '  ') + '\n'
   for name in std.objectFields(dashboards)

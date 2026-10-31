@@ -308,39 +308,6 @@ groups:
         for: 10m
         labels:
           severity: warning
-      - alert: KubeMemoryOvercommit
-        annotations:
-          description: Cluster has overcommitted memory resource requests for Pods by {{ $value | humanize }} bytes and cannot tolerate node failure.
-          runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryovercommit
-          summary: Cluster has overcommitted memory resource requests.
-        expr: |
-          # Non-HA clusters.
-          (
-            (
-              sum(namespace_memory:kube_pod_container_resource_requests:sum{})
-              -
-              sum(kube_node_status_allocatable{resource="memory", job="kube-state-metrics"}) > 0
-            )
-            and
-            count(max by (node) (kube_node_role{job="kube-state-metrics", role="control-plane"})) < 3
-          )
-          or
-          # HA clusters.
-          (
-            sum(namespace_memory:kube_pod_container_resource_requests:sum{})
-            -
-            (
-              # Skip clusters with only one allocatable node.
-              (
-                sum(kube_node_status_allocatable{resource="memory", job="kube-state-metrics"})
-                -
-                max(kube_node_status_allocatable{resource="memory", job="kube-state-metrics"})
-              ) > 0
-            ) > 0
-          )
-        for: 10m
-        labels:
-          severity: warning
       - alert: KubeCPUQuotaOvercommit
         annotations:
           description: Cluster has overcommitted CPU resource requests for Namespaces.
