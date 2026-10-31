@@ -19,9 +19,8 @@ LG TV (webOS)                                           WLED controllers
   [hyperion.ng-webos-loader](https://github.com/webosbrew/hyperion.ng-webos-loader).
   Web UI: http://lgwebostv:8090. Config in `/home/root/.hyperion`, log in
   `/tmp/hyperion.ng.log`.
-- **WLED** controllers. Hyperion sends to them via DDP (seen on Sofa and Bed;
-  which ones Hyperion drives is in its LED device config). Each controller
-  lists the others it found (`/json/nodes`):
+- **WLED** controllers, one Hyperion instance each. Each controller lists the
+  others it found (`/json/nodes`):
 
   | Name    | IP              | Chip     | LEDs                       |
   |---------|-----------------|----------|----------------------------|
@@ -34,6 +33,30 @@ LG TV (webOS)                                           WLED controllers
   | Terrace | 192.168.178.162 | ESP32-C3 | 60 SK6812 RGBW             |
 
   Desk sends WLED UDP sync, the others receive it.
+
+## Hyperion → WLED: DDP, not the WLED device type
+
+The Hyperion instances (Living, Office, Kitchen, TV-Living, Sofax, Bedxx,
+Spotx) use the plain DDP controller type (`udpddp`, under "Network") with
+host `wled-<Name>.fritz.box`, port 4048, and smoothing on (linear, 25 Hz,
+100 ms).
+
+Don't use Hyperion's `wled` controller type. It switches the device on with
+`{"live": true}` over the JSON API, which WLED treats as realtime mode without
+timeout (`realtimeLock(65000)`, wled/WLED#5288). If Hyperion doesn't stop
+cleanly (TV standby, crash, Wi-Fi), it never sends `{"live": false}` and the
+strip stays stuck in DDP mode until it's rebooted. With plain DDP, WLED enters
+realtime mode on the first packet and leaves it by itself after its realtime
+timeout (Sync settings, 2.5 s). Smoothing keeps Hyperion sending at 25 Hz even
+during a still picture, so the timeout only hits when Hyperion really stops.
+Home Assistant keeps control of the strips; their own state shows again once
+the stream ends.
+
+To get a stuck strip out of realtime mode by hand:
+
+```sh
+curl -X POST -H 'Content-Type: application/json' -d '{"live":false}' http://wled-Desk.fritz.box/json/state
+```
 
 ## Building Hyperion.NG for the TV
 
