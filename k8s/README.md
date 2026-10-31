@@ -114,3 +114,17 @@ Left over afterwards, delete by hand when convenient:
   every namespace but `minecraft`.
 - `argo`: Argo Workflows 3.2.6, unused since the CI workflow was removed.
   Not converted; `kubectl delete ns argo` plus its CRDs and ClusterRoles.
+
+## Removed apps
+
+Apps we don't run any more, kept in git history. To restore one, check it out
+from before the commit that deleted it and add it back to its namespace's
+`kustomization.yaml` (and its Secrets to `apply-secrets`):
+
+```sh
+dir=k8s/monitoring/ssh-tunnel
+git checkout "$(git log -n1 --format=%H -- "$dir")^" -- "$dir"
+```
+
+- `monitoring/ssh-tunnel`: forwarded node-exporter of `fish@52.117.41.204`
+  over SSH. Removed when that host went away.
