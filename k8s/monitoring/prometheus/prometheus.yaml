@@ -259,6 +259,8 @@ scrape_configs:
           - https://google.com/
           - https://5pi.de/
   - job_name: prosafe-exporter
+    # The exporter sends no Content-Type, which Prometheus 3 rejects otherwise
+    fallback_scrape_protocol: PrometheusText0.0.4
     metrics_path: /probe
     relabel_configs:
       - source_labels:
