@@ -111,14 +111,6 @@
           },
           "expr": "sum(rate(scheduler_scheduling_algorithm_duration_seconds_count{cluster=\"$cluster\", job=\"kube-apiserver\", instance=~\"$instance\"}[$__rate_interval])) by (cluster, instance)",
           "legendFormat": "{{cluster}} {{instance}} scheduling algorithm"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum(rate(scheduler_volume_scheduling_duration_seconds_count{cluster=\"$cluster\", job=\"kube-apiserver\", instance=~\"$instance\"}[$__rate_interval])) by (cluster, instance)",
-          "legendFormat": "{{cluster}} {{instance}} volume"
         }
       ],
       "title": "Scheduling Rate",
@@ -186,14 +178,6 @@
           },
           "expr": "histogram_quantile(0.99, sum(rate(scheduler_scheduling_algorithm_duration_seconds_bucket{cluster=\"$cluster\", job=\"kube-apiserver\",instance=~\"$instance\"}[$__rate_interval])) by (cluster, instance, le))",
           "legendFormat": "{{cluster}} {{instance}} scheduling algorithm"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "histogram_quantile(0.99, sum(rate(scheduler_volume_scheduling_duration_seconds_bucket{cluster=\"$cluster\", job=\"kube-apiserver\",instance=~\"$instance\"}[$__rate_interval])) by (cluster, instance, le))",
-          "legendFormat": "{{cluster}} {{instance}} volume"
         }
       ],
       "title": "Scheduling latency 99th Quantile",
