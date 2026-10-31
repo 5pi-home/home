@@ -26,11 +26,12 @@ spec:
             - |
               mkdir -p plugins
               cp -nrs /paper/plugins/* plugins/ # Symlink all files in /paper/plugins/* to plugins/
-              # The metrics exporter listens on localhost by default, Prometheus scrapes the pod IP
+              # Metrics exporter: listen on the pod IP for Prometheus (default
+              # localhost) and enable the per-player metrics for the Minecraft
+              # Players dashboard. The plugin adds defaults for everything else.
               mkdir -p plugins/PrometheusExporter
-              touch plugins/PrometheusExporter/config.yml
-              sed -i '/^host:/d' plugins/PrometheusExporter/config.yml
-              echo 'host: 0.0.0.0' >> plugins/PrometheusExporter/config.yml
+              printf '%s\n' 'host: 0.0.0.0' 'enable_metrics:' '  player_online: true' '  player_statistic: true' \
+                > plugins/PrometheusExporter/config.yml
               echo eula=true > eula.txt
               exec java -Xmx4096M -Xms4096M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -DbundlerRepoDir=/paper -jar /paper/paper.jar -W /data \
                 | sed -u 's#/\(register\|login\).*#/\1 [REDACTED]#'
