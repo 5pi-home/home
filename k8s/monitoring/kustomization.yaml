@@ -10,4 +10,3 @@ resources:
   - prometheus
   - prosafe-exporter
   - smokeping-exporter
-  - ssh-tunnel
