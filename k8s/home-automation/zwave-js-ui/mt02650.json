@@ -1,0 +1,68 @@
+// zwave-js' device config for the Danfoss LC-13 (sold as Devolo Thermostat
+// 09356), with the setpoint range added: the thermostat doesn't report it, so
+// Home Assistant offers 0-50 °C, and the device turns anything below 4 °C into
+// 4 °C. Better Thermostat then sends its "off" temperature 0 °C over and over
+// and ignores setpoints changed on the thermostats meanwhile.
+// Copy of packages/config/config/devices/0x0002/mt02650.json from zwave-js
+// v15.21.0 plus overrideQueries; zwave-js-ui loads it from store/config
+// instead of the bundled file. Drop it once zwave-js ships the range.
+{
+	"manufacturer": "Danfoss",
+	"manufacturerId": "0x0002",
+	"label": "MT02650",
+	"description": "Devolo Thermostat (09356)",
+	"devices": [
+		{
+			"productType": "0x0005",
+			"productId": "0x0175"
+		}
+	],
+	"firmwareVersion": {
+		"min": "0.0",
+		"max": "255.255"
+	},
+	"associations": {
+		"1": {
+			"label": "Target for Wakeup and Override Notifications",
+			"maxNodes": 10,
+			"isLifeline": true
+		},
+		"2": {
+			"label": "Temperature sensor",
+			"maxNodes": 1
+		}
+	},
+	"compat": {
+		// If we don't query specific things on wake up, this device will
+		// think it is not connected and show error E5
+		"queryOnWakeup": [
+			// ["CommandClass", "API method", ...arguments]
+			["Battery", "get"],
+			["Thermostat Setpoint", "get", 1]
+		],
+		// Thermostat Setpoint V2 has no Capabilities Get, so the range is set
+		// during the interview
+		"overrideQueries": {
+			"Thermostat Setpoint": [
+				{
+					"method": "getSupportedSetpointTypes",
+					"result": [
+						1 // Heating
+					],
+					"extendMetadata": {
+						"setpoint(1)": {
+							"min": 4,
+							"max": 28
+						}
+					}
+				}
+			]
+		}
+	},
+	"metadata": {
+		"inclusion": "Press and release the middle button (with a star).",
+		"exclusion": "Press and release the middle button (with a star).",
+		"reset": "Remove the batteries and take out one battery. While reinserting the battery, press and hold the function button (with a star) for about 5 seconds.",
+		"manual": "http://manuals-backend.z-wave.info/make.php?lang=en&sku=DEVE9356&cert=ZC08-15020003"
+	}
+}

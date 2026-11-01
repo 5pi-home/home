@@ -4,3 +4,9 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+configMapGenerator:
+  - name: zwave-js-ui
+    files:
+      - mt02650.json
+    options:
+      disableNameSuffixHash: true

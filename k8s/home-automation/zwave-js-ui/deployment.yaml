@@ -28,6 +28,11 @@ spec:
               mountPath: /dev/ttyACM-zwave
             - name: data
               mountPath: /usr/src/app/store
+            # Device config files in store/config take priority over the
+            # ones bundled with zwave-js; see mt02650.json.
+            - name: config
+              mountPath: /usr/src/app/store/config/mt02650.json
+              subPath: mt02650.json
       volumes:
         - name: dev
           hostPath:
@@ -37,3 +42,6 @@ spec:
         - name: data
           hostPath:
             path: /data/zwave-js-ui
+        - name: config
+          configMap:
+            name: zwave-js-ui
