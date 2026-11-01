@@ -22,7 +22,7 @@ spec:
             value: "1"
       containers:
         - name: home-assistant
-          image: homeassistant/home-assistant:2026.4.0
+          image: homeassistant/home-assistant:2026.10.4
           command: [python3, -m, homeassistant, --config, /config]
           securityContext:
             privileged: true
