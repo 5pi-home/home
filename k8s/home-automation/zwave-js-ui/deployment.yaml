@@ -20,7 +20,7 @@ spec:
             value: "1"
       containers:
         - name: zwave-js-ui
-          image: zwavejs/zwave-js-ui:11.12.0
+          image: zwavejs/zwave-js-ui:11.25.2
           securityContext:
             privileged: true
           volumeMounts:
