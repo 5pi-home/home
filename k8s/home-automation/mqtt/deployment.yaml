@@ -12,6 +12,9 @@ spec:
       labels:
         name: mqtt
     spec:
+      # The data volume is a hostPath on filer.
+      nodeSelector:
+        kubernetes.io/hostname: filer
       securityContext:
         fsGroup: 1883
       containers:
