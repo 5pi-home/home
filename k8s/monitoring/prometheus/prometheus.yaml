@@ -139,8 +139,22 @@ scrape_configs:
     metrics_path: /probe
     params:
       module:
-        - http_2xx
+        - tcp_connect
     relabel_configs:
+      # Ports named http or http-* get an HTTP probe, all other TCP ports
+      # just a TCP connect. UDP ports can't be probed generically.
+      - action: drop
+        regex: UDP
+        source_labels:
+          - __meta_kubernetes_service_port_protocol
+      - regex: http(-.*)?
+        replacement: http_2xx
+        source_labels:
+          - __meta_kubernetes_service_port_name
+        target_label: __param_module
+      - source_labels:
+          - __param_module
+        target_label: module
       - source_labels:
           - __address__
         target_label: __param_target
