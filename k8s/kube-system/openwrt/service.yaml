@@ -6,5 +6,6 @@ spec:
   type: ExternalName
   externalName: 192.168.1.1
   ports:
-    - port: 5080
+    - name: http
+      port: 5080
       targetPort: 5080

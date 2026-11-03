@@ -6,5 +6,6 @@ spec:
   type: ExternalName
   externalName: dafang
   ports:
-    - port: 443
+    - name: https
+      port: 443
       targetPort: 443
