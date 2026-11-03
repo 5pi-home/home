@@ -141,6 +141,16 @@ scrape_configs:
       module:
         - http_2xx
     relabel_configs:
+      # Only probe HTTP ports: an HTTP request to e.g. mosquitto or postgres
+      # always fails and fills their logs with protocol errors.
+      - action: drop
+        regex: UDP
+        source_labels:
+          - __meta_kubernetes_service_port_protocol
+      - action: drop
+        regex: mqtt|postgres|redis|dns-tcp|game|dlna-tcp|plex-.*|\d+-tcp
+        source_labels:
+          - __meta_kubernetes_service_port_name
       - source_labels:
           - __address__
         target_label: __param_target
